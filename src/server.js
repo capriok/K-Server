@@ -1,13 +1,13 @@
 const express = require('express')
 const cors = require('cors')
+require('dotenv').config
 const mongoose = require('mongoose')
 const serverless = require("serverless-http");
 
 const app = express()
 
-// DEV PORT SPECIFICATION
-// const port = process.env.PORT || 9000
-// app.listen(port, () => console.log(`Server running on port: ${port}`))
+const port = process.env.PORT
+app.listen(port, () => console.log(`Server running on port: ${port}`))
 
 console.log = () => { }
 
