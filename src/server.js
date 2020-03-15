@@ -57,7 +57,7 @@ router.route('/update').post(async (req, res) => {
     let doc = await Entry.findOneAndUpdate({ name: name }, { time: time, seconds: seconds });
     doc = await Entry.findOne({ name: name });
     console.log(doc);
-    res.status(200).json('Edit Successful')
+    res.status(200).json('Entry edit successful')
   } catch (error) {
     console.log('No user by that name.')
     const newEntry = new Entry({ name, time, seconds })
