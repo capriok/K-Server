@@ -1,0 +1,26 @@
+{
+  "name": "leaderboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "./node_modules/.bin/netlify-lambda serve src",
+    "build": "./node_modules/.bin/netlify-lambda build src",
+    "dev": " cd src && nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.4",
+    "mongoose": "^5.9.3",
+    "netlify-lambda": "^1.6.3",
+    "serve": "^11.3.0",
+    "serverless-http": "^2.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
