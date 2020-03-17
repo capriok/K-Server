@@ -12,8 +12,17 @@ const entrySchema = new Schema({
     trim: true
   },
   seconds: {
-    type: Number
-  }
+    type: Number,
+    trim: true
+  },
+  ip: {
+    type: String,
+    trim: true
+  },
+  location: {
+    type: String,
+    trim: true
+  },
 })
 
 const Entry = mongoose.model('Entry', entrySchema)
