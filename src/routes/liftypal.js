@@ -2,7 +2,6 @@ const router = require('express').Router()
 const axios = require('axios')
 const API_KEY = process.env.API_KEY
 
-// LIFTYPAL ROUTES
 // RESOURCE https://wger.de/en/software/api
 
 const header = { Authorization: `Token ${API_KEY}` }
@@ -15,10 +14,10 @@ const pal = axios.create({
 router.route('/muscle').get(async (req, res) => {
   console.log('fired');
 
-  await pal
-    .get('/muscle', header)
-    .then(response => res.send(response.data))
-    .catch(err => console.log(err))
+  // await pal
+  //   .get('/muscle', header)
+  //   .then(response => res.send(response.data))
+  //   .catch(err => console.log(err))
 })
 
 router.route('/exercise').get(async (req, res) => {

@@ -32,15 +32,14 @@ app.use((req, res, next) => {
   next()
 })
 
-//LEADERBOARD ENTRY ROUTES
+//LEADERBOARD ENTRY ROUTE
 const leaderboardRouter = require('./routes/leaderboardEntry')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 
-//LIFTYPAL ROUTES
+//API ROUTES
 const liftypalRouter = require('./routes/liftypal')
 app.use('/.netlify/functions/server/api/', liftypalRouter)
-
 
 //EXPORTS
 module.exports = app;
