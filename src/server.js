@@ -1,15 +1,13 @@
 const express = require('express')
 const cors = require('cors')
-require('dotenv').config
 const mongoose = require('mongoose')
 const serverless = require("serverless-http");
+require('dotenv').config()
 
 const app = express()
 
-const port = process.env.PORT
+const port = process.env.PORT || 9000
 app.listen(port, () => console.log(`Server running on port: ${port}`))
-
-console.log = () => { }
 
 app.use(cors())
 app.use(express.json())
@@ -36,10 +34,9 @@ app.use((req, res, next) => {
 const leaderboardRouter = require('./routes/leaderboardEntry')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
-
 //API ROUTES
 const liftypalRouter = require('./routes/liftypal')
-app.use('/.netlify/functions/server/api/', liftypalRouter)
+app.use('/.netlify/functions/server/api', liftypalRouter)
 
 //EXPORTS
 module.exports = app;
