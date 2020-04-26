@@ -5,7 +5,7 @@ const PASSWORD = process.env.PASSWORD
 const pool = new Pool({
   user: 'postgres',
   password: PASSWORD,
-  database: 'liftypal',
+  database: 'sqlifting',
   host: HOST,
   port: 5432
 });
@@ -13,7 +13,7 @@ const pool = new Pool({
 module.exports = pool;
 
 
-// const pool = require("./liftypal-db");
+// const pool = require("./sqlifting-db");
 
 // app.get('/exercises', async (req, res) => {
 //   try {
