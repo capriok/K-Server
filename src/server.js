@@ -35,7 +35,7 @@ const leaderboardRouter = require('./routes/leaderboardEntry')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 //API ROUTES
-const SQLiftingRouter = require('./routes/liftypal')
+const SQLiftingRouter = require('./routes/sqlifting')
 app.use('/.netlify/functions/server/api', SQLiftingRouter)
 
 //EXPORTS

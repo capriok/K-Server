@@ -11,15 +11,3 @@ const pool = new Pool({
 });
 
 module.exports = pool;
-
-
-// const pool = require("./sqlifting-db");
-
-// app.get('/exercises', async (req, res) => {
-//   try {
-//     const allExercises = await pool.query("SELECT * FROM exercises")
-//     res.json(allExercises.rows)
-//   } catch (error) {
-//     console.error(error.message)
-//   }
-// })
