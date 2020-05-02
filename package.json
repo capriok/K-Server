@@ -28,6 +28,7 @@
     "serverless-http": "^2.3.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "serverless-bundle": "^1.4.0"
   }
 }
