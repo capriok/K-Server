@@ -47,32 +47,38 @@ router.route('/post/equipment').post(async (req, res) => {
 })
 
 // GET REQUESTS FROM DATABASE
-router.route('/get/muscle').get(async (req, res) => {
+router.route('/get/muscles').get(async (req, res) => {
   try {
-    const postMuscle = await pool.query(
+    const getMuscle = await pool.query(
       "SELECT muscle FROM database WHERE muscle IS NOT NULL"
     )
-    res.status(200).json(postMuscle.rows)
+    const parsedData = getMuscle.rows
+    parsedData.forEach((item, i) => item.id = i + 1)
+    res.status(200).json(parsedData)
   } catch (error) {
     console.error(error.message)
   }
 })
-router.route('/get/exercise').get(async (req, res) => {
+router.route('/get/exercises').get(async (req, res) => {
   try {
-    const postExercise = await pool.query(
+    const getExercise = await pool.query(
       "SELECT exercise FROM database WHERE exercise IS NOT NULL"
     )
-    res.status(200).json(postExercise.rows)
+    const parsedData = getExercise.rows
+    parsedData.forEach((item, i) => item.id = i + 1)
+    res.status(200).json(parsedData)
   } catch (error) {
     console.error(error.message)
   }
 })
 router.route('/get/equipment').get(async (req, res) => {
   try {
-    const postEquipment = await pool.query(
+    const getEquipment = await pool.query(
       "SELECT equipment FROM database WHERE equipment IS NOT NULL"
     )
-    res.status(200).json(postEquipment.rows)
+    const parsedData = getEquipment.rows
+    parsedData.forEach((item, i) => item.id = i + 1)
+    res.status(200).json(parsedData)
   } catch (error) {
     console.error(error.message)
   }
