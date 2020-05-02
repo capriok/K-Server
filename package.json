@@ -1,8 +1,12 @@
 {
   "name": "k-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "k-server",
   "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capriok/k-server.git"
+  },
   "scripts": {
     "start": "./node_modules/.bin/netlify-lambda serve src",
     "build": "./node_modules/.bin/netlify-lambda build src",
