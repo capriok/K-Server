@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "./node_modules/.bin/netlify-lambda serve src",
-    "build": "./node_modules/.bin/netlify-lambda build src",
+    "build": "./node_modules/.bin/netlify-lambda build src -c ./webpack.config.js",
     "dev": " cd src && nodemon server.js"
   },
   "keywords": [],
@@ -28,7 +28,6 @@
     "serverless-http": "^2.3.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2",
-    "serverless-bundle": "^1.4.0"
+    "nodemon": "^2.0.2"
   }
 }
