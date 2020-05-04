@@ -8,7 +8,7 @@
     "url": "git+https://github.com/capriok/k-server.git"
   },
   "scripts": {
-    "start": "./node_modules/.bin/netlify-lambda serve src",
+    "start": "./node_modules/.bin/netlify-lambda serve src -c ./webpack.config.js",
     "build": "./node_modules/.bin/netlify-lambda build src -c ./webpack.config.js",
     "dev": " cd src && nodemon server.js"
   },
