@@ -140,16 +140,16 @@ router.route('/get/builtworkouts').get(async (req, res) => {
 // ------------------------------------------------------------- //
 // INSERT INTO WORKOUTS TABLE
 router.route('/post/builtworkouts').post(async (req, res) => {
-  // const { name, muscle, exercise, equipment } = req.body
-  // try {
-  //   const postExercise = await pool.query(
-  //     "INSERT INTO exercises (name, muscle, exercise, equipment) VALUES ($1, $2, $3, $4)"
-  //     , [name, muscle, exercise, equipment]
-  //   )
-  //   res.status(200).json(postExercise.rows)
-  // } catch (error) {
-  //   console.error(error.message)
-  // }
+  const { name, workout } = req.body
+  try {
+    const postWorkout = await pool.query(
+      "INSERT INTO workouts (name, workout) VALUES ($1, $2)"
+      , [name, JSON.stringify(workout)]
+    )
+    res.status(200).json(postWorkout.rows)
+  } catch (error) {
+    console.error(error.message)
+  }
 })
 
 module.exports = router
