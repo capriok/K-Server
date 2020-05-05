@@ -95,6 +95,22 @@ router.route('/post/equipmentdata').post(async (req, res) => {
     console.error(error.message)
   }
 })
+// ------------------------------------------------------------- //
+// DELETE FROM DATABASE TABLE
+router.route('/delete/fromdatabase').post(async (req, res) => {
+  const { column, row } = req.body
+  console.log(column);
+  console.log(row);
+  try {
+    const database = await pool.query(
+      `DELETE FROM database WHERE ${column} = $1`, [row]
+    )
+    console.log('deleted', row, 'from', column, 'column');
+    res.status(200).json(database)
+  } catch (error) {
+    console.error(error.message)
+  }
+})
 
 // ------------------------------------------------------------- //
 // SELECT FROM EXERCISES TABLE
