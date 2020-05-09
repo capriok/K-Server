@@ -1,10 +1,29 @@
 const router = require('express').Router();
-
 const pool = require("../database/sqlifting-db");
+const cors = require('cors')
+
+var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app']
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+
+router.use(cors(corsOptions), (req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, PATCH, DELETE");
+    return res.status(200).json({});
+  }
+  next();
+});
 
 // ------------------------------------------------------------- //
 // SELECT * FROM _____
-router.route('/').get(async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const allDatabase = await pool.query("SELECT * FROM database")
     const allExercises = await pool.query("SELECT * FROM exercises")
@@ -29,7 +48,7 @@ const parseDatabaseResponse = (res, payload, type) => {
   })
   return res.status(200).json(reOrderDataProperties)
 }
-router.route('/get/muscles').get(async (req, res) => {
+router.get('/get/muscles', async (req, res) => {
   try {
     const getMuscle = await pool.query(
       "SELECT muscle FROM database WHERE muscle IS NOT NULL"
@@ -39,7 +58,7 @@ router.route('/get/muscles').get(async (req, res) => {
     console.error(error.message)
   }
 })
-router.route('/get/exercises').get(async (req, res) => {
+router.get('/get/exercises', async (req, res) => {
   try {
     const getExercise = await pool.query(
       "SELECT exercise FROM database WHERE exercise IS NOT NULL"
@@ -49,7 +68,7 @@ router.route('/get/exercises').get(async (req, res) => {
     console.error(error.message)
   }
 })
-router.route('/get/equipment').get(async (req, res) => {
+router.get('/get/equipment', async (req, res) => {
   try {
     const getEquipment = await pool.query(
       "SELECT equipment FROM database WHERE equipment IS NOT NULL"
@@ -62,7 +81,7 @@ router.route('/get/equipment').get(async (req, res) => {
 
 // ------------------------------------------------------------- //
 // INSERT INTO DATABASE TABLE
-router.route('/post/muscledata').post(async (req, res) => {
+router.post('/post/muscledata', async (req, res) => {
   const { muscle } = req.body
   try {
     const postMuscles = await pool.query(
@@ -73,7 +92,7 @@ router.route('/post/muscledata').post(async (req, res) => {
     console.error(error.message)
   }
 })
-router.route('/post/exercisedata').post(async (req, res) => {
+router.post('/post/exercisedata', async (req, res) => {
   const { exercise } = req.body
   try {
     const postExercise = await pool.query(
@@ -84,7 +103,7 @@ router.route('/post/exercisedata').post(async (req, res) => {
     console.error(error.message)
   }
 })
-router.route('/post/equipmentdata').post(async (req, res) => {
+router.post('/post/equipmentdata', async (req, res) => {
   const { equipment } = req.body
   try {
     const postEquipment = await pool.query(
@@ -97,7 +116,7 @@ router.route('/post/equipmentdata').post(async (req, res) => {
 })
 // ------------------------------------------------------------- //
 // DELETE FROM DATABASE TABLE
-router.route('/delete/fromdatabase').post(async (req, res) => {
+router.post('/delete/fromdatabase', async (req, res) => {
   const { column, row } = req.body
   console.log(column);
   console.log(row);
@@ -114,7 +133,7 @@ router.route('/delete/fromdatabase').post(async (req, res) => {
 
 // ------------------------------------------------------------- //
 // SELECT FROM EXERCISES TABLE
-router.route('/get/builtexercises').get(async (req, res) => {
+router.get('/get/builtexercises', async (req, res) => {
   try {
     const getExercise = await pool.query(
       "SELECT * FROM exercises"
@@ -127,7 +146,7 @@ router.route('/get/builtexercises').get(async (req, res) => {
 
 // ------------------------------------------------------------- //
 // INSERT INTO EXERCISES TABLE
-router.route('/post/builtexercise').post(async (req, res) => {
+router.post('/post/builtexercise', async (req, res) => {
   const { name, equipment, muscle, exercise } = req.body
   try {
     const postExercises = await pool.query(
@@ -142,7 +161,7 @@ router.route('/post/builtexercise').post(async (req, res) => {
 
 // ------------------------------------------------------------- //
 // SELECT FROM WORKOUTS TABLE
-router.route('/get/builtworkouts').get(async (req, res) => {
+router.get('/get/builtworkouts', async (req, res) => {
   try {
     const getWorkouts = await pool.query(
       "SELECT * FROM workouts"
@@ -155,7 +174,7 @@ router.route('/get/builtworkouts').get(async (req, res) => {
 
 // ------------------------------------------------------------- //
 // INSERT INTO WORKOUTS TABLE
-router.route('/post/builtworkouts').post(async (req, res) => {
+router.post('/post/builtworkouts', async (req, res) => {
   const { name, workout } = req.body
   try {
     const postWorkout = await pool.query(

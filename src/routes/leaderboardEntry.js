@@ -1,13 +1,32 @@
 const router = require('express').Router()
 let Entry = require('../models/entry.model.js')
+const cors = require('cors')
 
-router.route('/').get((req, res) => {
+var whitelist = ['http://localhost:3000', 'https://disarray.kylecaprio.dev']
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+router.use(cors(corsOptions), (req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, PATCH, DELETE");
+    return res.status(200).json({});
+  }
+  next();
+});
+
+router.get('/', (req, res) => {
   Entry.find()
     .then(entries => res.json(entries))
     .catch(err => res.status(400).json('Error: ' + err))
 })
 
-router.route('/update').post(async (req, res) => {
+router.post('/update', async (req, res) => {
   let name = req.body.name
   let time = req.body.time
   let seconds = req.body.seconds
