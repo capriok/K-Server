@@ -1,18 +1,10 @@
 const router = require('express').Router()
 let Entry = require('../models/entry.model.js')
-const cors = require('cors')
+const { cors, corsOptions } = require('../cors/cors')
+const whitelist = ['http://localhost:3000', 'https://disarray.kylecaprio.dev']
 
-var whitelist = ['http://localhost:3000', 'https://disarray.kylecaprio.dev']
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}
-router.use(cors(corsOptions), (req, res, next) => {
+router.use(cors(corsOptions(whitelist)), (req, res, next) => {
+  console.log(whitelist);
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET, PUT, POST, PATCH, DELETE");
     return res.status(200).json({});

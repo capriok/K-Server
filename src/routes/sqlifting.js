@@ -1,19 +1,9 @@
 const router = require('express').Router();
 const pool = require("../database/sqlifting-db");
-const cors = require('cors')
-
+const { cors, corsOptions } = require('../cors/cors')
 var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app']
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}
 
-router.use(cors(corsOptions), (req, res, next) => {
+router.use(cors(corsOptions(whitelist)), (req, res, next) => {
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET, PUT, POST, PATCH, DELETE");
     return res.status(200).json({});
