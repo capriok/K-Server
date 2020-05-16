@@ -23,8 +23,13 @@ const leaderboardRouter = require('./routes/leaderboardEntry')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 //API ROUTES
-const SQLiftingRouter = require('./routes/sqlifting')
+const SQLiftingRouter = require('./routes/sqlifting-api')
 app.use('/.netlify/functions/server/api', SQLiftingRouter)
+
+// SQLifting Login / Sign up
+const SQLiftingAccRouter = require('./routes/sqlifting-account.js')
+app.use('/.netlify/functions/server/sqlifting', SQLiftingAccRouter)
+
 
 //EXPORTS
 module.exports = app;
