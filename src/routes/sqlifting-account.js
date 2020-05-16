@@ -53,6 +53,7 @@ router.post('/register', async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
+    res.end()
   }
 });
 
@@ -87,6 +88,7 @@ router.post('/login', async (req, res) => {
     }
   } catch (error) {
     console.log(error);
+    res.end()
   }
 });
 
