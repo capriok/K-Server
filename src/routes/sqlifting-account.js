@@ -2,7 +2,7 @@ const router = require('express').Router();
 const pool = require("../database/sqlifting-db");
 const jwt = require('jsonwebtoken')
 const { cors, corsOptions } = require('../cors/cors')
-var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app']
+var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app', 'https://sqlifting.kylecaprio.dev']
 
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {
   if (req.method === "OPTIONS") {
