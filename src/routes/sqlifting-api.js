@@ -159,7 +159,7 @@ router.post('/delete/frombuiltexercises', async (req, res) => {
   const { user_id, column, row } = req.body
   try {
     const exercises = await pool.query(
-      `DELETE FROM exercises WHERE user_id = $1 AND ${column}= $2`, [user_id, row]
+      `DELETE FROM exercises WHERE user_id = $1 AND LOWER(${column})= $2`, [user_id, row]
     )
     console.log('deleted', row, 'from', column, 'column of user', user_id);
     res.status(200).json(exercises)
@@ -203,7 +203,7 @@ router.post('/delete/frombuiltworkouts', async (req, res) => {
   const { user_id, column, row } = req.body
   try {
     const workouts = await pool.query(
-      `DELETE FROM workouts WHERE user_id = $1 AND ${column}= $2`, [user_id, row]
+      `DELETE FROM workouts WHERE user_id = $1 AND LOWER(${column})= $2`, [user_id, row]
     )
     console.log('deleted', row, 'from', column, 'column of user', user_id);
     res.status(200).json(workouts)
