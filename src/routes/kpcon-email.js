@@ -2,6 +2,7 @@ const router = require('express').Router();
 const nodemailer = require('nodemailer')
 const { cors, corsOptions } = require('../cors/cors')
 var whitelist = ['http://localhost:3000', 'https://keithphillingane.com']
+require('dotenv').config()
 
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -30,7 +31,7 @@ router.post('/send', async (req, res) => {
   referral ? referralRow = referralRow : referralRow = ''
 
   let mailOptions = {
-    // to: 'keithphillingane@gmail.com',
+    // to: process.env.TOEMAIL,
     to: 'capriodev@gmail.com',
     from: 'keithphillingane.client@gmail.com',
     subject: `New Client Inquiry (${name})`,
@@ -77,10 +78,11 @@ router.post('/send', async (req, res) => {
     port: 465,
     secure: true,
     auth: {
-      user: 'keithphillingane.client@gmail.com',
-      pass: '586887Devils',
+      user: process.env.EMAILACC,
+      pass: process.env.EMAILPASS,
     },
   });
+
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (!error) {

@@ -3,7 +3,6 @@ const serverless = require("serverless-http");
 const mongo = require('./database/mongodb')
 require('dotenv').config()
 
-
 const app = express()
 
 const port = process.env.PORT || 9000
