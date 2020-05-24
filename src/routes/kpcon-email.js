@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const nodemailer = require('nodemailer')
 const { cors, corsOptions } = require('../cors/cors')
-var whitelist = ['http://localhost:3000', 'https://keithphillingane.com']
+var whitelist = ['http://localhost:3000', 'https://kpcon.netlify.app', 'https://keithphillingane.com']
 require('dotenv').config()
 
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {
@@ -31,8 +31,7 @@ router.post('/send', async (req, res) => {
   referral ? referralRow = referralRow : referralRow = ''
 
   let mailOptions = {
-    // to: process.env.TOEMAIL,
-    to: 'capriodev@gmail.com',
+    to: process.env.KP_EMAILTO,
     from: 'keithphillingane.client@gmail.com',
     subject: `New Client Inquiry (${name})`,
     html: `
@@ -78,8 +77,8 @@ router.post('/send', async (req, res) => {
     port: 465,
     secure: true,
     auth: {
-      user: process.env.EMAILACC,
-      pass: process.env.EMAILPASS,
+      user: process.env.KP_EMAILACC,
+      pass: process.env.KP_EMAILPASS,
     },
   });
 
