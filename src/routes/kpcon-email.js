@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const nodemailer = require('nodemailer')
 const { cors, corsOptions } = require('../cors/cors')
-var whitelist = ['http://localhost:3000', 'https://kpcon.netlify.app', 'https://keithphillingane.com']
+var whitelist = ['http://localhost:3000', 'https://kpcon.netlify.app', 'https://www.keithphillingane.com']
 require('dotenv').config()
 
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {
