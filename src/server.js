@@ -24,8 +24,13 @@ const SQLiftingAccRouter = require('./routes/sqlifting-account.js')
 app.use('/.netlify/functions/server/sqlifting', SQLiftingAccRouter)
 
 //Keith Phillingane LLC Client Email Dispatch Route
+const PortfolioEmailRouter = require('./routes/portfolio-email.js')
+app.use('/.netlify/functions/server/portfolioemail', PortfolioEmailRouter)
+
+//Keith Phillingane LLC Client Email Dispatch Route
 const KPClientEmailRouter = require('./routes/kpcon-email.js')
 app.use('/.netlify/functions/server/kpclientemail', KPClientEmailRouter)
+
 
 //EXPORTS
 module.exports = app;

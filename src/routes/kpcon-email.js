@@ -32,7 +32,7 @@ router.post('/send', async (req, res) => {
 
   let mailOptions = {
     to: process.env.KP_EMAILTO,
-    from: 'keithphillingane.client@gmail.com',
+    from: process.env.KP_EMAILACC,
     subject: `New Client Inquiry (${name})`,
     html: `
       <table style="max-width: 700px; width: 100%;">
@@ -43,7 +43,7 @@ router.post('/send', async (req, res) => {
           </td>
         </tr>
         <tr>
-          <th><img src="https://i.imgur.com/YHdd7Gv.png" alt="" style="width: 150px;"/></th>
+          <th><img src="https://i.imgur.com/YHdd7Gv.png" alt="" style="width: 100px;"/></th>
         </tr>
         <tr>
           <td style="font-family: Arial; padding-top: 20px;">
