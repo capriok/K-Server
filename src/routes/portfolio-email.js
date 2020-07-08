@@ -62,8 +62,9 @@ router.post('/send', async (req, res) => {
 
   let transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
+    ignoreTLS: false,
     auth: {
       user: process.env.KC_EMAILACC,
       pass: process.env.KC_EMAILPASS,
