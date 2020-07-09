@@ -61,10 +61,9 @@ router.post('/send', async (req, res) => {
   };
 
   let transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    ignoreTLS: false,
+    host: 'smtp.zoho.com',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.KC_EMAILACC,
       pass: process.env.KC_EMAILPASS,
