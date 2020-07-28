@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const pool = require("../database/sqlifting-db");
+const pool = require("../database/postgresdb");
 const { cors, corsOptions } = require('../cors/cors')
 var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app', 'https://sqlifting.kylecaprio.dev']
 

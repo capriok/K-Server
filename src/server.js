@@ -1,19 +1,25 @@
 const express = require('express')
 const serverless = require("serverless-http");
 const mongo = require('./database/mongodb')
+const pool = require('./database/mysqldb')
 require('dotenv').config()
 
 const app = express()
-
 const port = process.env.PORT || 9000
-app.listen(port, () => console.log(`Server running on port: ${port}`))
+
+app.listen(port, () => console.log(`Server running on port ${port}`))
 mongo.once('open', () => console.log('MongoDB connected successfully'))
+pool.on('connection', () => console.log('MySQL pool connected'));
 
 app.use(express.json())
 
 //Disarray Leaderboard Entry Route
 const leaderboardRouter = require('./routes/leaderboardEntry')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
+
+//API Routes
+const MySQLiftingRouter = require('./routes/mysqlifting-api')
+app.use('/.netlify/functions/server/mysql', MySQLiftingRouter)
 
 //API Routes
 const SQLiftingRouter = require('./routes/sqlifting-api')

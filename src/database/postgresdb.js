@@ -1,10 +1,10 @@
 const Pool = require("pg").Pool;
-const HOST = process.env.HOST
-const PASSWORD = process.env.PASSWORD
+const HOST = process.env.POSTGRESHOST
+const PASS = process.env.POSTGRESPASS
 
 const pool = new Pool({
   user: 'postgres',
-  password: PASSWORD,
+  password: PASS,
   database: 'sqlifting',
   host: HOST,
   port: 5432

@@ -23,6 +23,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.5.5",
     "mongoose": "^5.9.6",
+    "mysql": "^2.18.1",
     "netlify-lambda": "^1.6.3",
     "nodemailer": "^6.4.6",
     "pg": "^8.0.3",
