@@ -19,14 +19,18 @@ app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 //API Routes
 const MySQLiftingRouter = require('./routes/mysqlifting-api')
-app.use('/.netlify/functions/server/mysql', MySQLiftingRouter)
-
-//API Routes
-const SQLiftingRouter = require('./routes/sqlifting-api')
-app.use('/.netlify/functions/server/api', SQLiftingRouter)
+app.use('/.netlify/functions/server/sqlifting/api', MySQLiftingRouter)
 
 // SQLifting Login / Register
-const SQLiftingAccRouter = require('./routes/sqlifting-account.js')
+const MySQLiftingAccRouter = require('./routes/mysqlifting-account.js')
+app.use('/.netlify/functions/server/sqlifting', MySQLiftingAccRouter)
+
+//LEGACY API Routes
+const SQLiftingRouter = require('./routes/sqlifting-api')
+app.use('/.netlify/functions/server/sqliftinglegacy/api', SQLiftingRouter)
+
+//LEGACY SQLifting Login / Register
+const SQLiftingAccRouter = require('./routes/mysqlifting-account.js')
 app.use('/.netlify/functions/server/sqlifting', SQLiftingAccRouter)
 
 //Keith Phillingane LLC Client Email Dispatch Route
