@@ -32,7 +32,6 @@ const parse = (res) => {
   return arr
 }
 
-
 // ------------------------------------------------------------- //
 // GET ALL COMPOSITIONS
 router.get('/get/compositions', async (req, res) => {
@@ -41,6 +40,7 @@ router.get('/get/compositions', async (req, res) => {
     SELECT eq.eq_id, eq.name FROM equipment eq WHERE uid = ${_(uid)};
     SELECT mu.mu_id, mu.name FROM muscle mu WHERE uid = ${_(uid)};
     SELECT ex.ex_id, ex.name FROM exercise ex WHERE uid = ${_(uid)};
+    SELECT mo.mo_id, mo.name FROM movement mo WHERE uid = ${_(uid)};
     `,
     (error, results) => {
       if (error) throw error;
@@ -48,7 +48,8 @@ router.get('/get/compositions', async (req, res) => {
       let compositions = {
         equipments: parse(results[0]),
         muscles: parse(results[1]),
-        exercises: parse(results[2])
+        exercises: parse(results[2]),
+        movements: parse(results[3])
       }
       res.json(compositions)
     })
