@@ -22,16 +22,16 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.27.0",
-    "mongodb": "^3.5.5",
-    "mongoose": "^5.9.6",
+    "mongodb": "^3.6.0",
+    "mongoose": "^5.9.27",
     "mysql": "^2.18.1",
     "netlify-lambda": "^1.6.3",
-    "nodemailer": "^6.4.6",
-    "pg": "^8.0.3",
-    "serve": "^11.3.0",
-    "serverless-http": "^2.3.2"
+    "nodemailer": "^6.4.11",
+    "pg": "^8.3.0",
+    "serve": "^11.3.2",
+    "serverless-http": "^2.5.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.4"
   }
 }
