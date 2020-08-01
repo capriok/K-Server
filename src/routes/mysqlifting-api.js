@@ -16,15 +16,6 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
 
 const _ = mysql.format
 
-const parse = (res) => {
-  const arr = []
-  res.forEach(r => {
-    let row = JSON.parse(JSON.stringify(r))
-    arr.push(row)
-  })
-  return arr
-}
-
 const processTables = (tables, statements) => {
   let query = []
   if (tables === undefined) {
@@ -105,7 +96,7 @@ router.get('/get/composites', async (req, res) => {
 })
 
 // ------------------------------------------------------------- //
-// INSERT INTO (composition)table with name and uid
+// INSERT INTO (composition table) with name and uid
 router.post('/post/composition', async (req, res) => {
   const { table, name, uid } = req.body
 
@@ -154,6 +145,33 @@ router.post('/post/exco', async (req, res) => {
     (error, results) => {
       if (error) console.log(error)
       console.log(`Record successfully inserted`);
+      res.json(results)
+    })
+})
+
+
+// ------------------------------------------------------------- //
+// INSERT INTO woco with name and uid
+// INSERT INTO woco with woco_id, exco_id, reps, sets, weight
+router.post('/post/woco', async (req, res) => {
+  const { name, woco_id, uid, woco_excos } = req.body
+  pool.query(`
+    INSERT INTO woco (name, uid)
+    VALUES ('${_(name)}', '${_(uid)}');
+    `,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully inserted (woco)`);
+      woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
+        pool.query(`
+          INSERT INTO woco_excos (woco_id, exco_id, sets, reps, weight)
+          VALUES ('${_(woco_id)}', '${_(exco_id)}', '${_(sets)}', '${_(reps)}', '${_(weight)}');
+          `,
+          (error, results) => {
+            if (error) console.log(error)
+            console.log(`Record successfully inserted (woco_exco)`);
+          })
+      });
       res.json(results)
     })
 })
