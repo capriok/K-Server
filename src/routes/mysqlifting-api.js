@@ -75,7 +75,6 @@ router.get('/get/compositions', async (req, res) => {
     })
 })
 
-
 // ------------------------------------------------------------- //
 // GET ALL COMPOSITES
 router.get('/get/composites', async (req, res) => {
@@ -92,6 +91,25 @@ router.get('/get/composites', async (req, res) => {
       console.log('Composites fetched successfully');
       const finalResults = composeResult('composites', tables, results)
       res.json(finalResults)
+    })
+})
+
+// ------------------------------------------------------------- //
+// GET ALL COMPOSITES
+router.get('/get/woco_excos', async (req, res) => {
+  const { uid, id: woco_id } = req.query
+  pool.query(`
+  SELECT exco.name, sets, reps, weight FROM woco 
+  JOIN woco_excos 
+  ON woco.uid = ${_(uid)} 
+  AND woco.woco_id = ${_(woco_id)} 
+  AND woco.woco_id = woco_excos.woco_id
+  JOIN exco USING (exco_id);
+  `,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(results);
+      res.json(results)
     })
 })
 
@@ -175,5 +193,6 @@ router.post('/post/woco', async (req, res) => {
       res.json(results)
     })
 })
+
 
 module.exports = router
