@@ -2,7 +2,7 @@
   "name": "k-server",
   "version": "1.0.0",
   "description": "k-server",
-  "main": "server.js",
+  "main": "functions/server.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/capriok/k-server.git"
