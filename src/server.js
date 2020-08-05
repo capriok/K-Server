@@ -18,12 +18,12 @@ const leaderboardRouter = require('./routes/leaderboardEntry')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 //API Routes
-const MySQLiftingRouter = require('./routes/sqlifting-api')
-app.use('/.netlify/functions/server/sqlifting/api', MySQLiftingRouter)
+const SQLiftingRouter = require('./routes/sqlifting-api')
+app.use('/.netlify/functions/server/sqlifting/api', SQLiftingRouter)
 
 // SQLifting Login / Register
-const MySQLiftingAccRouter = require('./routes/sqlifting-account.js')
-app.use('/.netlify/functions/server/sqlifting', MySQLiftingAccRouter)
+const SQLiftingAccRouter = require('./routes/sqlifting-account.js')
+app.use('/.netlify/functions/server/sqlifting', SQLiftingAccRouter)
 
 //Personal Portfolio Email Dispatch Route
 const PortfolioEmailRouter = require('./routes/portfolio-email.js')
