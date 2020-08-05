@@ -25,21 +25,16 @@ router.post('/register', async (req, res) => {
   const { password } = req.body;
   const date = moment().format('YYYY-MM-DD H:mm:ss');
 
-  try {
-    pool.query(`
+  pool.query(`
       INSERT INTO user (username, password, join_date)
       VALUES('${_(username)}', '${_(password)}', '${_(date)}')
       `,
-      (error, results) => {
-        if (error) throw error
-        console.table(results)
-        res.status(200).send("Account created");
-      }
-    );
-  } catch (err) {
-    console.error(err.message);
-    res.end()
-  }
+    (error, results) => {
+      if (error) throw error
+      console.table(results)
+      res.status(200).send("Account created");
+    }
+  );
 });
 
 // LOGIN
@@ -47,33 +42,28 @@ router.post('/login', async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
 
-  try {
-    pool.query(`
+  pool.query(`
       SELECT u.uid, u.username, u.join_date
       FROM user u
       WHERE username = '${_(username)}' AND password = '${_(password)}'
       `,
-      (error, results) => {
-        if (error) throw error
-        const validCredentials = results.length > 0
-        if (validCredentials) {
-          console.log('Account found');
-          const user = {
-            uid: results[0].uid,
-            name: results[0].username
-          }
-          console.table(results)
-          const token = jwt.sign(user, process.env.SECRET)
-          res.status(200).send({ user, token })
-        } else {
-          console.log('Invalid Credentials');
-          res.status(409).end()
+    (error, results) => {
+      if (error) throw error
+      const validCredentials = results.length > 0
+      if (validCredentials) {
+        console.log('Account found');
+        const user = {
+          uid: results[0].uid,
+          name: results[0].username
         }
-      });
-  } catch (error) {
-    console.log(error);
-    res.end()
-  }
+        console.table(results)
+        const token = jwt.sign(user, process.env.SECRET)
+        res.status(200).send({ user, token })
+      } else {
+        console.log('Invalid Credentials');
+        res.status(409).end()
+      }
+    });
 });
 
 module.exports = router

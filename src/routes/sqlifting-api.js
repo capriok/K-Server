@@ -65,16 +65,13 @@ router.get('/get/compositions', async (req, res) => {
     movements: `SELECT mo.mo_id id, mo.name FROM movement mo WHERE uid = ${_(uid)};`
   }
   const query = processTables(tables, statements)
-
-  try {
-    pool.query(query,
-      (error, results) => {
-        if (error) throw new error
-        console.log('Compositions fetched successfully');
-        const finalResults = composeResult('compositions', tables, results)
-        res.json(finalResults)
-      })
-  } catch (error) { console.log(error); res.end(); }
+  pool.query(query,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log('Compositions fetched successfully');
+      const finalResults = composeResult('compositions', tables, results)
+      res.json(finalResults)
+    })
 })
 
 // ------------------------------------------------------------- //
@@ -87,25 +84,20 @@ router.get('/get/composites', async (req, res) => {
     wocos: `SELECT woco.woco_id id, woco.name FROM woco WHERE uid = ${_(uid)};`
   }
   const query = processTables(tables, statements)
-
-  try {
-    pool.query(query,
-      (error, results) => {
-        if (error) throw new error
-        console.log('Composites fetched successfully');
-        const finalResults = composeResult('composites', tables, results)
-        res.json(finalResults)
-      })
-  } catch (error) { console.log(error); res.end(); }
+  pool.query(query,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log('Composites fetched successfully');
+      const finalResults = composeResult('composites', tables, results)
+      res.json(finalResults)
+    })
 })
 
 // ------------------------------------------------------------- //
 // GET WOCO EXCOS
 router.get('/get/woco_excos', async (req, res) => {
   const { uid, id: woco_id } = req.query
-
-  try {
-    pool.query(`
+  pool.query(`
   SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
   FROM woco_excos a
   JOIN exco b ON a.exco_id = b.exco_id
@@ -114,11 +106,10 @@ router.get('/get/woco_excos', async (req, res) => {
   INNER JOIN exercise ex ON b.ex_id = ex.ex_id
   INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
   `,
-      (error, results) => {
-        if (error) throw new error
-        res.json(results)
-      })
-  } catch (error) { console.log(error); res.end(); }
+    (error, results) => {
+      if (error) console.log(error)
+      res.json(results)
+    })
 })
 
 // ------------------------------------------------------------- //
@@ -126,17 +117,15 @@ router.get('/get/woco_excos', async (req, res) => {
 router.post('/post/composition', async (req, res) => {
   const { table, name, uid } = req.body
 
-  try {
-    pool.query(`
+  pool.query(`
     INSERT INTO ${table} (name, uid)
     VALUES ('${name}', '${uid}');
     `,
-      (error, results) => {
-        if (error) throw new error
-        console.log(`Record successfully inserted into ${table} (${name})`);
-        res.json(results)
-      })
-  } catch (error) { console.log(error); res.end(); }
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully inserted into ${table} (${name})`);
+      res.json(results)
+    })
 })
 
 // ------------------------------------------------------------- //
@@ -150,16 +139,14 @@ router.post('/delete/byid', async (req, res) => {
     tableId = table.substring(0, 2).concat('_id')
   }
 
-  try {
-    pool.query(`
+  pool.query(`
     DELETE FROM ${_(table)} WHERE ${_(tableId)} = ${_(id)};
     `,
-      (error, results) => {
-        if (error) throw new error
-        console.log(`Record successfully deleted from ${table} (${id})`);
-        res.json(results)
-      })
-  } catch (error) { console.log(error); res.end(); }
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully deleted from ${table} (${id})`);
+      res.json(results)
+    })
 })
 
 
@@ -168,17 +155,15 @@ router.post('/delete/byid', async (req, res) => {
 router.post('/post/exco', async (req, res) => {
   const { name, uid, eq_id, mu_id, ex_id } = req.body
 
-  try {
-    pool.query(`
+  pool.query(`
     INSERT INTO exco (name, uid, eq_id, mu_id, ex_id)
     VALUES ('${_(name)}', '${_(uid)}', '${_(eq_id)}', '${_(mu_id)}', '${_(ex_id)}');
     `,
-      (error, results) => {
-        if (error) throw new error
-        console.log(`Record successfully inserted`);
-        res.json(results)
-      })
-  } catch (error) { console.log(error); res.end(); }
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully inserted`);
+      res.json(results)
+    })
 })
 
 
@@ -187,29 +172,26 @@ router.post('/post/exco', async (req, res) => {
 // INSERT INTO woco with woco_id, exco_id, reps, sets, weight
 router.post('/post/woco', async (req, res) => {
   const { name, woco_id, uid, woco_excos } = req.body
-
-  try {
-    pool.query(`
+  pool.query(`
     INSERT INTO woco (name, uid)
     VALUES ('${_(name)}', '${_(uid)}');
     `,
-      (error, results) => {
-        if (error) throw new error
-        console.log(`Record successfully inserted (woco)`);
-        woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
-          console.log(woco_id);
-          pool.query(`
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully inserted (woco)`);
+      woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
+        console.log(woco_id);
+        pool.query(`
           INSERT INTO woco_excos (woco_id, exco_id, sets, reps, weight)
           VALUES ('${_(woco_id)}', '${_(exco_id)}', '${_(sets)}', '${_(reps)}', '${_(weight)}');
           `,
-            (error, results) => {
-              if (error) throw new error
-              console.log(`Record successfully inserted (woco_exco)`);
-            })
-        });
-        res.json(results)
-      })
-  } catch (error) { console.log(error); res.end(); }
+          (error, results) => {
+            if (error) console.log(error)
+            console.log(`Record successfully inserted (woco_exco)`);
+          })
+      });
+      res.json(results)
+    })
 })
 
 
