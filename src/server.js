@@ -34,4 +34,5 @@ const KPClientEmailRouter = require('./routes/kpcon-email.js')
 app.use('/.netlify/functions/server/kpclientemail', KPClientEmailRouter)
 
 //EXPORTS
+module.exports = app;
 module.exports.handler = serverless(app);
