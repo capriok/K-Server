@@ -95,20 +95,20 @@ router.get('/get/composites', async (req, res) => {
 })
 
 // ------------------------------------------------------------- //
-// GET ALL COMPOSITES
+// GET WOCO EXCOS
 router.get('/get/woco_excos', async (req, res) => {
   const { uid, id: woco_id } = req.query
   pool.query(`
-  SELECT exco.name, sets, reps, weight FROM woco 
-  JOIN woco_excos 
-  ON woco.uid = ${_(uid)} 
-  AND woco.woco_id = ${_(woco_id)} 
-  AND woco.woco_id = woco_excos.woco_id
-  JOIN exco USING (exco_id);
+  SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
+  FROM woco_excos a
+  JOIN exco b ON a.exco_id = b.exco_id
+  AND a.woco_id = ${_(woco_id)}
+  INNER JOIN muscle mu ON b.mu_id = mu.mu_id
+  INNER JOIN exercise ex ON b.ex_id = ex.ex_id
+  INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
   `,
     (error, results) => {
       if (error) console.log(error)
-      console.log(results);
       res.json(results)
     })
 })
