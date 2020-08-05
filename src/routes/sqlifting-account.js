@@ -24,7 +24,7 @@ router.post('/register', async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
   const date = moment().format('YYYY-MM-DD H:mm:ss');
-  console.log(date);
+
   try {
     pool.query(`
       INSERT INTO user (username, password, join_date)
@@ -46,6 +46,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
+
   try {
     pool.query(`
       SELECT u.uid, u.username, u.join_date
