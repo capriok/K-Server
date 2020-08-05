@@ -32,6 +32,9 @@
     "serverless-http": "^2.5.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.11.1",
+    "@babel/preset-env": "^7.11.0",
+    "babel-loader": "^8.1.0",
     "nodemon": "^2.0.4"
   }
 }
