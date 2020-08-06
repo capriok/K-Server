@@ -15,7 +15,8 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
 
 const _ = mysql.format
 
-const processTables = (tables, statements) => {
+// THIS CAN BE DONE SMARTER AND MORE DYNAMIC
+const composeQuery = (tables, statements) => {
   let query = []
   if (tables === undefined) {
     Object.keys(statements).forEach(s => query.push(statements[s]))
@@ -25,6 +26,8 @@ const processTables = (tables, statements) => {
   return query.toString().replace(/,SELECT/g, 'SELECT')
 }
 
+
+//REDO COMPOSE RESULTS FUNC TO BE DYNAMIC WITH BOTH COMPOSITIONS AND COMPOSITES
 const composeResult = (type, tables, res) => {
   let obj = {}
   if (tables === undefined) {
@@ -38,8 +41,7 @@ const composeResult = (type, tables, res) => {
     } else {
       obj = {
         circs: res[0],
-        excos: res[1],
-        wocos: res[2]
+        excos: res[1]
       }
     }
   } else if (tables.length === 1) {
@@ -55,62 +57,54 @@ const composeResult = (type, tables, res) => {
 }
 
 // ------------------------------------------------------------- //
-// GET ALL COMPOSITIONS
+// GET COMPOSITIONS ABSED ON REQUESTS PASSED IN
 router.get('/get/compositions', async (req, res) => {
-  const { uid, tables } = req.query
+  const { uid, requests } = req.query
   const statements = {
     equipments: `SELECT eq.eq_id id, eq.name FROM equipment eq WHERE uid = ${_(uid)};`,
     muscles: `SELECT mu.mu_id id, mu.name FROM muscle mu WHERE uid = ${_(uid)};`,
     exercises: `SELECT ex.ex_id id, ex.name FROM exercise ex WHERE uid = ${_(uid)};`,
     movements: `SELECT mo.mo_id id, mo.name FROM movement mo WHERE uid = ${_(uid)};`
   }
-  const query = processTables(tables, statements)
+  const query = composeQuery(requests, statements)
+  console.log(query);
   pool.query(query,
     (error, results) => {
       if (error) console.log(error)
       console.log('Compositions fetched successfully');
-      const finalResults = composeResult('compositions', tables, results)
+      const finalResults = composeResult('compositions', requests, results)
+      console.log(finalResults);
       res.json(finalResults)
     })
 })
 
 // ------------------------------------------------------------- //
-// GET ALL COMPOSITES
+// GET COMPOSITES ABSED ON REQUESTS PASSED IN
 router.get('/get/composites', async (req, res) => {
-  const { uid, tables } = req.query
+  const { uid, requests } = req.query
   const statements = {
     circs: `SELECT circ.circ_id id, circ.name FROM circ WHERE uid = ${_(uid)};`,
     excos: `SELECT exco.exco_id id, exco.name FROM exco WHERE uid = ${_(uid)};`,
     wocos: `SELECT woco.woco_id id, woco.name FROM woco WHERE uid = ${_(uid)};`
   }
-  const query = processTables(tables, statements)
+  // SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
+  // FROM woco_excos a
+  // JOIN exco b ON a.exco_id = b.exco_id
+  // AND a.woco_id = ${ _(woco_id) }
+  // INNER JOIN muscle mu ON b.mu_id = mu.mu_id
+  // INNER JOIN exercise ex ON b.ex_id = ex.ex_id
+  // INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
+  const query = composeQuery(requests, statements)
   pool.query(query,
     (error, results) => {
       if (error) console.log(error)
-      console.log('Composites fetched successfully');
-      const finalResults = composeResult('composites', tables, results)
+      console.log('Compositions fetched successfully');
+      const finalResults = composeResult('compositions', requests, results)
+      console.log(finalResults);
       res.json(finalResults)
     })
 })
 
-// ------------------------------------------------------------- //
-// GET WOCO EXCOS
-router.get('/get/woco_excos', async (req, res) => {
-  const { uid, id: woco_id } = req.query
-  pool.query(`
-  SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
-  FROM woco_excos a
-  JOIN exco b ON a.exco_id = b.exco_id
-  AND a.woco_id = ${_(woco_id)}
-  INNER JOIN muscle mu ON b.mu_id = mu.mu_id
-  INNER JOIN exercise ex ON b.ex_id = ex.ex_id
-  INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
-  `,
-    (error, results) => {
-      if (error) console.log(error)
-      res.json(results)
-    })
-})
 
 // ------------------------------------------------------------- //
 // INSERT INTO (composition table) with name and uid
@@ -127,6 +121,7 @@ router.post('/post/composition', async (req, res) => {
       res.json(results)
     })
 })
+
 
 // ------------------------------------------------------------- //
 // DELTE FROM table BY id
