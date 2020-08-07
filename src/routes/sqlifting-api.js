@@ -73,18 +73,38 @@ router.get('/get/composites', async (req, res) => {
 
 // ------------------------------------------------------------- //
 // GET WOCO_EXCOS FOR EACH WOCO
-router.get('/get/woco_excos', async (req, res) => {
+router.get('/get/woco_deps', async (req, res) => {
   const { woco_id } = req.query
   pool.query(`SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
               FROM woco_excos a
-              JOIN exco b ON a.exco_id = b.exco_id
+              JOIN exco b
+              ON a.exco_id = b.exco_id
               AND a.woco_id = ${ _(woco_id)}
               INNER JOIN muscle mu ON b.mu_id = mu.mu_id
               INNER JOIN exercise ex ON b.ex_id = ex.ex_id
               INNER JOIN equipment eq ON b.eq_id = eq.eq_id;`,
     (error, result) => {
       if (error) console.log(error)
-      console.log('Woco_excos successfully attached for woco ', woco_id);
+      console.log('Woco_deps attached successfully');
+      res.json(result)
+    })
+})
+
+// ------------------------------------------------------------- //
+// GET EXCO_DETAILS FOR EACH EXCO
+router.get('/get/exco_deps', async (req, res) => {
+  const { exco_id } = req.query
+  pool.query(`SELECT a.exco_id id, eq.name equipment , mu.name muscle, ex.name exercise
+              FROM exco a 
+              JOIN exco b
+              ON a.exco_id = b.exco_id
+              AND a.exco_id = ${_(exco_id)}
+              INNER JOIN muscle mu ON a.mu_id = mu.mu_id
+              INNER JOIN exercise ex ON a.ex_id = ex.ex_id
+              INNER JOIN equipment eq ON a.eq_id = eq.eq_id;`,
+    (error, result) => {
+      if (error) console.log(error)
+      console.log('Exco_deps attached successfully');
       res.json(result)
     })
 })
