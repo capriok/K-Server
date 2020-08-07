@@ -15,49 +15,23 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
 
 const _ = mysql.format
 
-// THIS CAN BE DONE SMARTER AND MORE DYNAMIC
-const composeQuery = (tables, statements) => {
+const composeQuery = (req, statements) => {
   let query = []
-  if (tables === undefined) {
-    Object.keys(statements).forEach(s => query.push(statements[s]))
-  } else {
-    tables.forEach(s => query.push(statements[s]))
-  }
+  req.forEach(s => query.push(statements[s]))
   return query.toString().replace(/,SELECT/g, 'SELECT')
 }
 
 
-//REDO COMPOSE RESULTS FUNC TO BE DYNAMIC WITH BOTH COMPOSITIONS AND COMPOSITES
-const composeResult = (type, tables, res) => {
+const composeResult = (req, res) => {
   let obj = {}
-  if (tables === undefined) {
-    if (type === 'compositions') {
-      obj = {
-        equipments: res[0],
-        muscles: res[1],
-        exercises: res[2],
-        movements: res[3]
-      }
-    } else {
-      obj = {
-        circs: res[0],
-        excos: res[1]
-      }
-    }
-  } else if (tables.length === 1) {
-    tables.forEach((t) => {
-      obj[t] = res
-    })
-  } else {
-    tables.forEach((t, i) => {
-      obj[t] = res[i]
-    })
-  }
+  req.forEach((t, i) => {
+    req.length === 1 ? obj[t] = res : obj[t] = res[i]
+  })
   return obj
 }
 
 // ------------------------------------------------------------- //
-// GET COMPOSITIONS ABSED ON REQUESTS PASSED IN
+// GET COMPOSITIONS BASED ON REQUESTS PASSED IN
 router.get('/get/compositions', async (req, res) => {
   const { uid, requests } = req.query
   const statements = {
@@ -67,19 +41,18 @@ router.get('/get/compositions', async (req, res) => {
     movements: `SELECT mo.mo_id id, mo.name FROM movement mo WHERE uid = ${_(uid)};`
   }
   const query = composeQuery(requests, statements)
-  console.log(query);
   pool.query(query,
     (error, results) => {
       if (error) console.log(error)
+      const finalResults = composeResult(requests, results)
       console.log('Compositions fetched successfully');
-      const finalResults = composeResult('compositions', requests, results)
-      console.log(finalResults);
       res.json(finalResults)
     })
 })
 
+
 // ------------------------------------------------------------- //
-// GET COMPOSITES ABSED ON REQUESTS PASSED IN
+// GET COMPOSITES BASED ON REQUESTS PASSED IN
 router.get('/get/composites', async (req, res) => {
   const { uid, requests } = req.query
   const statements = {
@@ -87,21 +60,32 @@ router.get('/get/composites', async (req, res) => {
     excos: `SELECT exco.exco_id id, exco.name FROM exco WHERE uid = ${_(uid)};`,
     wocos: `SELECT woco.woco_id id, woco.name FROM woco WHERE uid = ${_(uid)};`
   }
-  // SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
-  // FROM woco_excos a
-  // JOIN exco b ON a.exco_id = b.exco_id
-  // AND a.woco_id = ${ _(woco_id) }
-  // INNER JOIN muscle mu ON b.mu_id = mu.mu_id
-  // INNER JOIN exercise ex ON b.ex_id = ex.ex_id
-  // INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
   const query = composeQuery(requests, statements)
   pool.query(query,
     (error, results) => {
       if (error) console.log(error)
-      console.log('Compositions fetched successfully');
-      const finalResults = composeResult('compositions', requests, results)
-      console.log(finalResults);
+      const finalResults = composeResult(requests, results)
+      console.log('Composites fetched successfully');
       res.json(finalResults)
+    })
+})
+
+
+// ------------------------------------------------------------- //
+// GET WOCO_EXCOS FOR EACH WOCO
+router.get('/get/woco_excos', async (req, res) => {
+  const { woco_id } = req.query
+  pool.query(`SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
+              FROM woco_excos a
+              JOIN exco b ON a.exco_id = b.exco_id
+              AND a.woco_id = ${ _(woco_id)}
+              INNER JOIN muscle mu ON b.mu_id = mu.mu_id
+              INNER JOIN exercise ex ON b.ex_id = ex.ex_id
+              INNER JOIN equipment eq ON b.eq_id = eq.eq_id;`,
+    (error, result) => {
+      if (error) console.log(error)
+      console.log('Woco_excos successfully attached for woco ', woco_id);
+      res.json(result)
     })
 })
 
@@ -110,7 +94,6 @@ router.get('/get/composites', async (req, res) => {
 // INSERT INTO (composition table) with name and uid
 router.post('/post/composition', async (req, res) => {
   const { table, name, uid } = req.body
-
   pool.query(`
     INSERT INTO ${table} (name, uid)
     VALUES ('${name}', '${uid}');
@@ -166,7 +149,7 @@ router.post('/post/exco', async (req, res) => {
 // INSERT INTO woco with name and uid
 // INSERT INTO woco with woco_id, exco_id, reps, sets, weight
 router.post('/post/woco', async (req, res) => {
-  const { name, woco_id, uid, woco_excos } = req.body
+  const { name, id: woco_id, uid, woco_excos } = req.body
   pool.query(`
     INSERT INTO woco (name, uid)
     VALUES ('${_(name)}', '${_(uid)}');
@@ -175,7 +158,6 @@ router.post('/post/woco', async (req, res) => {
       if (error) console.log(error)
       console.log(`Record successfully inserted (woco)`);
       woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
-        console.log(woco_id);
         pool.query(`
           INSERT INTO woco_excos (woco_id, exco_id, sets, reps, weight)
           VALUES ('${_(woco_id)}', '${_(exco_id)}', '${_(sets)}', '${_(reps)}', '${_(weight)}');
