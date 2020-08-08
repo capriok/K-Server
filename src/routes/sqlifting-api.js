@@ -55,12 +55,14 @@ router.get('/get/compositions', async (req, res) => {
 // GET COMPOSITES BASED ON REQUESTS PASSED IN
 router.get('/get/composites', async (req, res) => {
   const { uid, requests } = req.query
+  console.log('REQS', requests);
   const statements = {
     circs: `SELECT circ.circ_id id, circ.name FROM circ WHERE uid = ${_(uid)};`,
     excos: `SELECT exco.exco_id id, exco.name FROM exco WHERE uid = ${_(uid)};`,
     wocos: `SELECT woco.woco_id id, woco.name FROM woco WHERE uid = ${_(uid)};`
   }
   const query = composeQuery(requests, statements)
+  console.log('QUERY', query);
   pool.query(query,
     (error, results) => {
       if (error) console.log(error)
@@ -160,6 +162,22 @@ router.post('/delete/byid', async (req, res) => {
   } else {
     tableId = table.substring(0, 2).concat('_id')
   }
+  pool.query(`
+    DELETE FROM ${_(table)} WHERE ${_(tableId)} = ${_(id)};
+    `,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully deleted from ${table} (${id})`);
+      res.json(results)
+    })
+})
+
+
+// ------------------------------------------------------------- //
+// DELTE FROM woco_excos by woco_id
+router.post('/delete/deps', async (req, res) => {
+  const { table, id } = req.body
+  const tableId = table.substring(0, 4).concat('_id')
   pool.query(`
     DELETE FROM ${_(table)} WHERE ${_(tableId)} = ${_(id)};
     `,
