@@ -75,36 +75,60 @@ router.get('/get/composites', async (req, res) => {
 // GET WOCO_EXCOS FOR EACH WOCO
 router.get('/get/woco_deps', async (req, res) => {
   const { woco_id } = req.query
-  pool.query(`SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
-              FROM woco_excos a
-              JOIN exco b
-              ON a.exco_id = b.exco_id
-              AND a.woco_id = ${ _(woco_id)}
-              INNER JOIN muscle mu ON b.mu_id = mu.mu_id
-              INNER JOIN exercise ex ON b.ex_id = ex.ex_id
-              INNER JOIN equipment eq ON b.eq_id = eq.eq_id;`,
+  pool.query(`
+    SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
+    FROM woco_excos a
+    JOIN exco b
+    ON a.exco_id = b.exco_id
+    AND a.woco_id = ${ _(woco_id)}
+    INNER JOIN muscle mu ON b.mu_id = mu.mu_id
+    INNER JOIN exercise ex ON b.ex_id = ex.ex_id
+    INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
+    `,
     (error, result) => {
       if (error) console.log(error)
-      console.log('Woco_deps attached successfully');
+      console.log('Woco deps attached successfully');
       res.json(result)
     })
 })
+
 
 // ------------------------------------------------------------- //
 // GET EXCO_DETAILS FOR EACH EXCO
 router.get('/get/exco_deps', async (req, res) => {
   const { exco_id } = req.query
-  pool.query(`SELECT a.exco_id id, eq.name equipment , mu.name muscle, ex.name exercise
-              FROM exco a 
-              JOIN exco b
-              ON a.exco_id = b.exco_id
-              AND a.exco_id = ${_(exco_id)}
-              INNER JOIN muscle mu ON a.mu_id = mu.mu_id
-              INNER JOIN exercise ex ON a.ex_id = ex.ex_id
-              INNER JOIN equipment eq ON a.eq_id = eq.eq_id;`,
+  pool.query(`
+    SELECT a.exco_id id, eq.name equipment , mu.name muscle, ex.name exercise
+    FROM exco a 
+    JOIN exco b
+    ON a.exco_id = b.exco_id
+    AND a.exco_id = ${_(exco_id)}
+    INNER JOIN muscle mu ON a.mu_id = mu.mu_id
+    INNER JOIN exercise ex ON a.ex_id = ex.ex_id
+    INNER JOIN equipment eq ON a.eq_id = eq.eq_id;
+    `,
     (error, result) => {
       if (error) console.log(error)
-      console.log('Exco_deps attached successfully');
+      console.log('Exco deps attached successfully');
+      res.json(result)
+    })
+})
+
+
+// ------------------------------------------------------------- //
+// GET EXCO_DETAILS FOR EACH EXCO
+router.get('/get/circ_deps', async (req, res) => {
+  const { circ_id } = req.query
+  pool.query(`
+    SELECT b.name, a.duration
+    FROM circ_movs a
+    JOIN movement b
+    ON a.mo_id = b.mo_id
+    AND a.circ_id = 1;
+    `,
+    (error, result) => {
+      if (error) console.log(error)
+      console.log('Circ deps attached successfully');
       res.json(result)
     })
 })
@@ -136,7 +160,6 @@ router.post('/delete/byid', async (req, res) => {
   } else {
     tableId = table.substring(0, 2).concat('_id')
   }
-
   pool.query(`
     DELETE FROM ${_(table)} WHERE ${_(tableId)} = ${_(id)};
     `,
@@ -152,7 +175,6 @@ router.post('/delete/byid', async (req, res) => {
 // INSERT INTO exco with name, uid, eq_id, mu_id, ex_id
 router.post('/post/exco', async (req, res) => {
   const { name, uid, eq_id, mu_id, ex_id } = req.body
-
   pool.query(`
     INSERT INTO exco (name, uid, eq_id, mu_id, ex_id)
     VALUES ('${_(name)}', '${_(uid)}', '${_(eq_id)}', '${_(mu_id)}', '${_(ex_id)}');
@@ -165,6 +187,7 @@ router.post('/post/exco', async (req, res) => {
 })
 
 
+
 // ------------------------------------------------------------- //
 // INSERT INTO woco with name and uid
 // INSERT INTO woco with woco_id, exco_id, reps, sets, weight
@@ -173,22 +196,21 @@ router.post('/post/woco', async (req, res) => {
   pool.query(`
     INSERT INTO woco (name, uid)
     VALUES ('${_(name)}', '${_(uid)}');
-    `,
-    (error, results) => {
-      if (error) console.log(error)
-      console.log(`Record successfully inserted (woco)`);
-      woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
-        pool.query(`
+    `, (error, results) => {
+    if (error) console.log(error)
+    console.log(`Record successfully inserted (woco)`);
+    woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
+      pool.query(`
           INSERT INTO woco_excos (woco_id, exco_id, sets, reps, weight)
           VALUES ('${_(woco_id)}', '${_(exco_id)}', '${_(sets)}', '${_(reps)}', '${_(weight)}');
           `,
-          (error, results) => {
-            if (error) console.log(error)
-            console.log(`Record successfully inserted (woco_exco)`);
-          })
-      });
-      res.json(results)
-    })
+        (error, results) => {
+          if (error) console.log(error)
+          console.log(`Record successfully inserted (woco_exco)`);
+        })
+    });
+    res.json(results)
+  })
 })
 
 

@@ -30,9 +30,14 @@ router.post('/register', async (req, res) => {
       VALUES('${_(username)}', '${_(password)}', '${_(date)}')
       `,
     (error, results) => {
-      if (error) throw error
+      if (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+          return res.send('Username taken')
+        }
+        throw error
+      }
       console.table(results)
-      res.status(200).send("Account created");
+      res.send("Account created");
     }
   );
 });
@@ -41,16 +46,16 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
-
-  pool.query(`
-      SELECT u.uid, u.username, u.join_date
-      FROM user u
-      WHERE username = '${_(username)}' AND password = '${_(password)}'
-      `,
+  pool.query(`SELECT u.uid, u.username, u.password, u.join_date
+              FROM user u
+              WHERE username = '${_(username)}'
+              AND password LIKE BINARY '${_(password)}'
+              `,
     (error, results) => {
+      console.log(results);
       if (error) throw error
-      const validCredentials = results.length > 0
-      if (validCredentials) {
+      const matchedUsername = results.length > 0
+      if (matchedUsername) {
         console.log('Account found');
         const user = {
           uid: results[0].uid,
@@ -58,10 +63,9 @@ router.post('/login', async (req, res) => {
         }
         console.table(results)
         const token = jwt.sign(user, process.env.SECRET)
-        res.status(200).send({ user, token })
+        res.send({ user, token })
       } else {
-        console.log('Invalid Credentials');
-        res.status(409).end()
+        res.status(400).end();
       }
     });
 });
