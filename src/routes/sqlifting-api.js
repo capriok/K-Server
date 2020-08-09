@@ -55,14 +55,12 @@ router.get('/get/compositions', async (req, res) => {
 // GET COMPOSITES BASED ON REQUESTS PASSED IN
 router.get('/get/composites', async (req, res) => {
   const { uid, requests } = req.query
-  console.log('REQS', requests);
   const statements = {
     circs: `SELECT circ.circ_id id, circ.name FROM circ WHERE uid = ${_(uid)};`,
     excos: `SELECT exco.exco_id id, exco.name FROM exco WHERE uid = ${_(uid)};`,
     wocos: `SELECT woco.woco_id id, woco.name FROM woco WHERE uid = ${_(uid)};`
   }
   const query = composeQuery(requests, statements)
-  console.log('QUERY', query);
   pool.query(query,
     (error, results) => {
       if (error) console.log(error)
@@ -74,7 +72,7 @@ router.get('/get/composites', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
-// GET WOCO_EXCOS FOR EACH WOCO
+// GET WOCO DEPS FOR EACH WOCO
 router.get('/get/woco_deps', async (req, res) => {
   const { woco_id } = req.query
   pool.query(`
@@ -86,6 +84,11 @@ router.get('/get/woco_deps', async (req, res) => {
     INNER JOIN muscle mu ON b.mu_id = mu.mu_id
     INNER JOIN exercise ex ON b.ex_id = ex.ex_id
     INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
+    SELECT a.circ_id  id, b.name, a.reps
+    FROM woco_circs a
+    JOIN circ b
+    ON a.circ_id = b.circ_id
+    AND a.woco_id = ${ _(woco_id)};
     `,
     (error, result) => {
       if (error) console.log(error)
@@ -96,7 +99,7 @@ router.get('/get/woco_deps', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
-// GET EXCO_DETAILS FOR EACH EXCO
+// GET EXCO DEPS FOR EACH EXCO
 router.get('/get/exco_deps', async (req, res) => {
   const { exco_id } = req.query
   pool.query(`
@@ -118,20 +121,34 @@ router.get('/get/exco_deps', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
-// GET EXCO_DETAILS FOR EACH EXCO
+// GET CIRC DEPS FOR EACH CIRC
 router.get('/get/circ_deps', async (req, res) => {
   const { circ_id } = req.query
   pool.query(`
-    SELECT b.name, a.duration
+    SELECT a.circ_id  id, b.name, a.duration
     FROM circ_movs a
     JOIN movement b
     ON a.mo_id = b.mo_id
-    AND a.circ_id = 1;
+    AND a.circ_id = ${_(circ_id)};
     `,
     (error, result) => {
       if (error) console.log(error)
       console.log('Circ deps attached successfully');
       res.json(result)
+    })
+})
+
+
+// ------------------------------------------------------------- //
+// GET MAX PRIMARY KEY OF table BY tableId
+router.get('/get/MAXpk', async (req, res) => {
+  const { table, id: tableId } = req.query
+  pool.query(`
+  SELECT MAX(${_(tableId)}) id FROM ${_(table)}
+  `,
+    (error, results) => {
+      if (error) console.log(error)
+      res.json(results[0].id)
     })
 })
 
@@ -174,7 +191,7 @@ router.post('/delete/byid', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
-// DELTE FROM woco_excos by woco_id
+// DELTE FROM dependency by pk id
 router.post('/delete/deps', async (req, res) => {
   const { table, id } = req.body
   const tableId = table.substring(0, 4).concat('_id')
