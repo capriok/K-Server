@@ -2,11 +2,22 @@ const mysql = require('mysql');
 const HOST = process.env.MYSQLHOST
 const PASS = process.env.MYSQLPASS
 
+//RDS
+// const pool = mysql.createPool({
+//   user: 'admin',
+//   password: PASS,
+//   database: 'sqlifting',
+//   host: HOST,
+//   port: 3306,
+//   multipleStatements: true
+// });
+
+//LOCAL
 const pool = mysql.createPool({
-  user: 'admin',
+  user: 'root',
   password: PASS,
   database: 'sqlifting',
-  host: HOST,
+  host: 'localhost',
   port: 3306,
   multipleStatements: true
 });

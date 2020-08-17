@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
-  pool.query(`SELECT u.uid, u.username, u.password, u.join_date
+  pool.query(`SELECT u.uid, u.username, u.join_date
               FROM user u
               WHERE username = '${_(username)}'
               AND password LIKE BINARY '${_(password)}'

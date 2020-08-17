@@ -72,6 +72,38 @@ router.get('/get/composites', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
+// GET COMPOSITION OCCURANCES IN COMPOSITES
+router.get('/get/occurrences', async (req, res) => {
+  const { table, entId } = req.query
+  let tableId = table.substring(0, 2).concat('_id')
+  let statements = {
+    exco: `
+    SELECT b.name
+    FROM ${_(table)} a
+    JOIN exco b
+    ON a.${_(tableId)} = ${_(entId)}
+    AND a.${_(tableId)} = b.${_(tableId)};`,
+    circ: `
+    SELECT c.name
+    FROM movement a
+    JOIN circ_movs b
+    ON a.${_(tableId)} = ${_(entId)}
+    AND a.${_(tableId)}= b.${_(tableId)}
+    JOIN circ c 
+    ON b.circ_id = c.circ_id;`
+  }
+  let query
+  table !== 'movement' ? query = statements.exco : query = statements.circ
+  pool.query(query,
+    (error, result) => {
+      if (error) console.log(error)
+      console.log('Composition occurrences attached successfully');
+      res.json(result)
+    })
+})
+
+
+// ------------------------------------------------------------- //
 // GET WOCO DEPS FOR EACH WOCO
 router.get('/get/woco_deps', async (req, res) => {
   const { woco_id } = req.query
@@ -180,7 +212,7 @@ router.post('/delete/byid', async (req, res) => {
     tableId = table.substring(0, 2).concat('_id')
   }
   pool.query(`
-    DELETE FROM ${_(table)} WHERE ${_(tableId)} = ${_(id)};
+    UPDATE ${_(table)} SET uid = 0 WHERE ${_(tableId)} = ${_(id)};
     `,
     (error, results) => {
       if (error) console.log(error)
