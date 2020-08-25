@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const pool = require("../database/mysqldb");
+const DB = require("../database/mysqldb");
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
@@ -25,10 +25,10 @@ router.post('/register', async (req, res) => {
   const { password } = req.body;
   const date = moment().format('YYYY-MM-DD H:mm:ss');
 
-  pool.query(`
-      INSERT INTO user (username, password, join_date)
-      VALUES('${_(username)}', '${_(password)}', '${_(date)}')
-      `,
+  DB.query(`
+    INSERT INTO user (username, password, join_date)
+    VALUES('${_(username)}', '${_(password)}', '${_(date)}')
+    `,
     (error, results) => {
       if (error) {
         if (error.code === 'ER_DUP_ENTRY') {
@@ -46,13 +46,13 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
-  pool.query(`SELECT u.uid, u.username, u.join_date
-              FROM user u
-              WHERE username = '${_(username)}'
-              AND password LIKE BINARY '${_(password)}'
-              `,
+  DB.query(`
+    SELECT u.uid, u.username, u.join_date
+    FROM user u
+    WHERE username = '${_(username)}'
+    AND password LIKE BINARY '${_(password)}'
+    `,
     (error, results) => {
-      console.log(results);
       if (error) throw error
       const matchedUsername = results.length > 0
       if (matchedUsername) {
@@ -65,6 +65,7 @@ router.post('/login', async (req, res) => {
         const token = jwt.sign(user, process.env.SECRET)
         res.send({ user, token })
       } else {
+        console.log('Login attempt failed');
         res.status(400).end();
       }
     });

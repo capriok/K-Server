@@ -1,7 +1,7 @@
 const express = require('express')
 const serverless = require("serverless-http");
 const mongo = require('./database/mongodb')
-const pool = require('./database/mysqldb')
+const mysql = require('./database/mysqldb')
 require('dotenv').config()
 
 const app = express()
@@ -9,7 +9,7 @@ const port = process.env.PORT || 9000
 
 app.listen(port, () => console.log(`Server running on port ${port}`))
 mongo.once('open', () => console.log('MongoDB connected successfully'))
-pool.on('connection', () => console.log('MySQL pool connected'));
+mysql.connect(() => console.log('MySQL connected successfully'))
 
 app.use(express.json())
 
@@ -30,7 +30,7 @@ const PortfolioEmailRouter = require('./routes/portfolio-email.js')
 app.use('/.netlify/functions/server/portfolioemail', PortfolioEmailRouter)
 
 //Keith Phillingane LLC Client Email Dispatch Route
-const KPClientEmailRouter = require('./routes/kpcon-email.js')
+const KPClientEmailRouter = require('./routes/kpcon-email.js');
 app.use('/.netlify/functions/server/kpclientemail', KPClientEmailRouter)
 
 //EXPORTS

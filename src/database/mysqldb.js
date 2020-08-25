@@ -13,13 +13,12 @@ const PASS = process.env.MYSQLPASS
 // });
 
 //LOCAL
-const pool = mysql.createPool({
+const connection = mysql.createConnection({
+  host: 'localhost',
   user: 'root',
   password: PASS,
   database: 'sqlifting',
-  host: 'localhost',
-  port: 3306,
   multipleStatements: true
 });
 
-module.exports = pool
+module.exports = connection

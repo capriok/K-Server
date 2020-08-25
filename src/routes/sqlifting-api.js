@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const pool = require("../database/mysqldb");
+const DB = require("../database/mysqldb");
 const mysql = require('mysql');
 const { cors, corsOptions } = require('../cors/cors');
 var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app', 'https://sqlifting.kylecaprio.dev']
@@ -22,12 +22,35 @@ const composeQuery = (req, statements) => {
 }
 
 
-const composeResult = (req, res) => {
+const composeResult = (req, res, group, statements) => {
+  let keys = Object.keys(statements)
   let obj = {}
   req.forEach((t, i) => {
-    req.length === 1 ? obj[t] = res : obj[t] = res[i]
+    if (req.length === 1) {
+      obj[t] = res
+      obj[t].forEach(j => {
+        j.table = keys[keys.indexOf(t)].slice(0, -1)
+        j.group = group
+      })
+    } else {
+      obj[t] = res[i]
+      obj[t].forEach(j => {
+        j.table = keys[keys.indexOf(t)].slice(0, -1)
+        j.group = group
+      })
+    }
   })
   return obj
+}
+
+const composeTableId = (table) => {
+  let tableId
+  if (table === 'circ' || table === 'exco' || table === 'woco') {
+    tableId = table.substring(0, 4).concat('_id')
+  } else {
+    tableId = table.substring(0, 2).concat('_id')
+  }
+  return tableId
 }
 
 // ------------------------------------------------------------- //
@@ -41,10 +64,10 @@ router.get('/get/compositions', async (req, res) => {
     movements: `SELECT mo.mo_id id, mo.name FROM movement mo WHERE uid = ${_(uid)};`
   }
   const query = composeQuery(requests, statements)
-  pool.query(query,
+  DB.query(query,
     (error, results) => {
       if (error) console.log(error)
-      const finalResults = composeResult(requests, results)
+      const finalResults = composeResult(requests, results, 'compositions', statements)
       console.log('Compositions fetched successfully');
       res.json(finalResults)
     })
@@ -61,10 +84,10 @@ router.get('/get/composites', async (req, res) => {
     wocos: `SELECT woco.woco_id id, woco.name FROM woco WHERE uid = ${_(uid)};`
   }
   const query = composeQuery(requests, statements)
-  pool.query(query,
+  DB.query(query,
     (error, results) => {
       if (error) console.log(error)
-      const finalResults = composeResult(requests, results)
+      const finalResults = composeResult(requests, results, 'composites', statements)
       console.log('Composites fetched successfully');
       res.json(finalResults)
     })
@@ -94,7 +117,7 @@ router.get('/get/occurrences', async (req, res) => {
   }
   let query
   table !== 'movement' ? query = statements.exco : query = statements.circ
-  pool.query(query,
+  DB.query(query,
     (error, result) => {
       if (error) console.log(error)
       console.log('Composition occurrences attached successfully');
@@ -107,7 +130,7 @@ router.get('/get/occurrences', async (req, res) => {
 // GET WOCO DEPS FOR EACH WOCO
 router.get('/get/woco_deps', async (req, res) => {
   const { woco_id } = req.query
-  pool.query(`
+  DB.query(`
     SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
     FROM woco_excos a
     JOIN exco b
@@ -134,7 +157,7 @@ router.get('/get/woco_deps', async (req, res) => {
 // GET EXCO DEPS FOR EACH EXCO
 router.get('/get/exco_deps', async (req, res) => {
   const { exco_id } = req.query
-  pool.query(`
+  DB.query(`
     SELECT a.exco_id id, eq.name equipment , mu.name muscle, ex.name exercise
     FROM exco a 
     JOIN exco b
@@ -156,7 +179,7 @@ router.get('/get/exco_deps', async (req, res) => {
 // GET CIRC DEPS FOR EACH CIRC
 router.get('/get/circ_deps', async (req, res) => {
   const { circ_id } = req.query
-  pool.query(`
+  DB.query(`
     SELECT a.circ_id  id, b.name, a.duration
     FROM circ_movs a
     JOIN movement b
@@ -172,10 +195,28 @@ router.get('/get/circ_deps', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
+// UPDATE COMPOSITION OR COMPOSITE NAME BY name 
+router.post('/post/entity_edit', async (req, res) => {
+  const { table, id, edit } = req.body
+  let tableId = composeTableId(table)
+  DB.query(`
+    UPDATE ${_(table)}
+    SET name = '${_(edit)}'
+    WHERE ${_(tableId)} = ${_(id)};
+  `,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log('Updated entity name');
+      res.json(results)
+    })
+})
+
+
+// ------------------------------------------------------------- //
 // GET MAX PRIMARY KEY OF table BY tableId
 router.get('/get/MAXpk', async (req, res) => {
   const { table, id: tableId } = req.query
-  pool.query(`
+  DB.query(`
   SELECT MAX(${_(tableId)}) id FROM ${_(table)}
   `,
     (error, results) => {
@@ -189,9 +230,9 @@ router.get('/get/MAXpk', async (req, res) => {
 // INSERT INTO (composition table) with name and uid
 router.post('/post/composition', async (req, res) => {
   const { table, name, uid } = req.body
-  pool.query(`
-    INSERT INTO ${table} (name, uid)
-    VALUES ('${name}', '${uid}');
+  DB.query(`
+    INSERT INTO ${_(table)} (name, uid)
+    VALUES ('${_(name)}', '${_(uid)}');
     `,
     (error, results) => {
       if (error) console.log(error)
@@ -205,14 +246,11 @@ router.post('/post/composition', async (req, res) => {
 // DELTE FROM table BY id
 router.post('/delete/byid', async (req, res) => {
   const { table, id } = req.body
-  let tableId
-  if (table === 'circ' || table === 'exco' || table === 'woco') {
-    tableId = table.substring(0, 4).concat('_id')
-  } else {
-    tableId = table.substring(0, 2).concat('_id')
-  }
-  pool.query(`
-    UPDATE ${_(table)} SET uid = 0 WHERE ${_(tableId)} = ${_(id)};
+  let tableId = composeTableId(table)
+  DB.query(`
+    UPDATE ${_(table)}
+    SET uid = 0
+    WHERE ${_(tableId)} = ${_(id)};
     `,
     (error, results) => {
       if (error) console.log(error)
@@ -227,8 +265,9 @@ router.post('/delete/byid', async (req, res) => {
 router.post('/delete/deps', async (req, res) => {
   const { table, id } = req.body
   const tableId = table.substring(0, 4).concat('_id')
-  pool.query(`
-    DELETE FROM ${_(table)} WHERE ${_(tableId)} = ${_(id)};
+  DB.query(`
+    DELETE FROM ${_(table)}
+    WHERE ${_(tableId)} = ${_(id)};
     `,
     (error, results) => {
       if (error) console.log(error)
@@ -242,7 +281,7 @@ router.post('/delete/deps', async (req, res) => {
 // INSERT INTO exco with name, uid, eq_id, mu_id, ex_id
 router.post('/post/exco', async (req, res) => {
   const { name, uid, eq_id, mu_id, ex_id } = req.body
-  pool.query(`
+  DB.query(`
     INSERT INTO exco (name, uid, eq_id, mu_id, ex_id)
     VALUES ('${_(name)}', '${_(uid)}', '${_(eq_id)}', '${_(mu_id)}', '${_(ex_id)}');
     `,
@@ -260,14 +299,14 @@ router.post('/post/exco', async (req, res) => {
 // INSERT INTO woco with woco_id, exco_id, reps, sets, weight
 router.post('/post/woco', async (req, res) => {
   const { name, id: woco_id, uid, woco_excos } = req.body
-  pool.query(`
+  DB.query(`
     INSERT INTO woco (name, uid)
     VALUES ('${_(name)}', '${_(uid)}');
     `, (error, results) => {
     if (error) console.log(error)
     console.log(`Record successfully inserted (woco)`);
     woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
-      pool.query(`
+      DB.query(`
           INSERT INTO woco_excos (woco_id, exco_id, sets, reps, weight)
           VALUES ('${_(woco_id)}', '${_(exco_id)}', '${_(sets)}', '${_(reps)}', '${_(weight)}');
           `,
