@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
         console.log('Account found');
         const user = {
           uid: results[0].uid,
-          name: results[0].username
+          username: results[0].username
         }
         console.table(results)
         const token = jwt.sign(user, process.env.SECRET)
