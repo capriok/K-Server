@@ -1,8 +1,10 @@
 const router = require('express').Router();
-const DB = require("../database/mysqldb");
+const DB = require("../../database/mysqldb");
 const mysql = require('mysql');
-const { cors, corsOptions } = require('../cors/cors');
+const { cors, corsOptions } = require('../../cors/cors');
 var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app', 'https://sqlifting.kylecaprio.dev']
+
+const SQLifting = require('../../models/queries')
 
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -20,7 +22,6 @@ const composeQuery = (req, statements) => {
   req.forEach(s => query.push(statements[s]))
   return query.toString().replace(/,SELECT/g, 'SELECT')
 }
-
 
 const composeResult = (req, res, group, statements) => {
   let keys = Object.keys(statements)
@@ -127,33 +128,6 @@ router.get('/get/occurrences', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
-// GET WOCO DEPS FOR EACH WOCO
-router.get('/get/woco_deps', async (req, res) => {
-  const { woco_id } = req.query
-  DB.query(`
-    SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
-    FROM woco_excos a
-    JOIN exco b
-    ON a.exco_id = b.exco_id
-    AND a.woco_id = ${ _(woco_id)}
-    INNER JOIN muscle mu ON b.mu_id = mu.mu_id
-    INNER JOIN exercise ex ON b.ex_id = ex.ex_id
-    INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
-    SELECT a.circ_id  id, b.name, a.reps
-    FROM woco_circs a
-    JOIN circ b
-    ON a.circ_id = b.circ_id
-    AND a.woco_id = ${ _(woco_id)};
-    `,
-    (error, result) => {
-      if (error) console.log(error)
-      console.log('Woco deps attached successfully');
-      res.json(result)
-    })
-})
-
-
-// ------------------------------------------------------------- //
 // GET EXCO DEPS FOR EACH EXCO
 router.get('/get/exco_deps', async (req, res) => {
   const { exco_id } = req.query
@@ -195,6 +169,33 @@ router.get('/get/circ_deps', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
+// GET WOCO DEPS FOR EACH WOCO
+router.get('/get/woco_deps', async (req, res) => {
+  const { woco_id } = req.query
+  DB.query(`
+    SELECT a.sets, a.reps, a.weight, b.name, eq.name equipment, mu.name muscle, ex.name exercise
+    FROM woco_excos a
+    JOIN exco b
+    ON a.exco_id = b.exco_id
+    AND a.woco_id = ${_(woco_id)}
+    INNER JOIN muscle mu ON b.mu_id = mu.mu_id
+    INNER JOIN exercise ex ON b.ex_id = ex.ex_id
+    INNER JOIN equipment eq ON b.eq_id = eq.eq_id;
+    SELECT a.circ_id  id, b.name, a.sets
+    FROM woco_circs a
+    JOIN circ b
+    ON a.circ_id = b.circ_id
+    AND a.woco_id = ${_(woco_id)};
+    `,
+    (error, result) => {
+      if (error) console.log(error)
+      console.log('Woco deps attached successfully');
+      res.json(result)
+    })
+})
+
+
+// ------------------------------------------------------------- //
 // UPDATE COMPOSITION OR COMPOSITE NAME BY name 
 router.post('/post/entity_edit', async (req, res) => {
   const { table, id, edit } = req.body
@@ -208,20 +209,6 @@ router.post('/post/entity_edit', async (req, res) => {
       if (error) console.log(error)
       console.log('Updated entity name');
       res.json(results)
-    })
-})
-
-
-// ------------------------------------------------------------- //
-// GET MAX PRIMARY KEY OF table BY tableId
-router.get('/get/MAXpk', async (req, res) => {
-  const { table, id: tableId } = req.query
-  DB.query(`
-  SELECT MAX(${_(tableId)}) id FROM ${_(table)}
-  `,
-    (error, results) => {
-      if (error) console.log(error)
-      res.json(results[0].id)
     })
 })
 
@@ -248,24 +235,6 @@ router.post('/delete/byid', async (req, res) => {
   const { table, id } = req.body
   let tableId = composeTableId(table)
   DB.query(`
-    UPDATE ${_(table)}
-    SET uid = 0
-    WHERE ${_(tableId)} = ${_(id)};
-    `,
-    (error, results) => {
-      if (error) console.log(error)
-      console.log(`Record successfully deleted from ${table} (${id})`);
-      res.json(results)
-    })
-})
-
-
-// ------------------------------------------------------------- //
-// DELTE FROM dependency by pk id
-router.post('/delete/deps', async (req, res) => {
-  const { table, id } = req.body
-  const tableId = table.substring(0, 4).concat('_id')
-  DB.query(`
     DELETE FROM ${_(table)}
     WHERE ${_(tableId)} = ${_(id)};
     `,
@@ -278,46 +247,108 @@ router.post('/delete/deps', async (req, res) => {
 
 
 // ------------------------------------------------------------- //
+// DELTE FROM dependency table by pk id
+router.post('/delete/deps', async (req, res) => {
+  const { table, id } = req.body
+  const tableId = table.substring(0, 4).concat('_id')
+  DB.query(`
+    DELETE FROM ${_(table)}
+    WHERE ${_(tableId)} = ${_(id)};
+    `,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully deleted from ${table} by pk (${id})`);
+      res.json(results)
+    })
+})
+
+
+// ------------------------------------------------------------- //
 // INSERT INTO exco with name, uid, eq_id, mu_id, ex_id
 router.post('/post/exco', async (req, res) => {
-  const { name, uid, eq_id, mu_id, ex_id } = req.body
+  const { uid, build } = req.body
+  const { name, equipment: { id: eq_id }, muscle: { id: mu_id }, exercise: { id: ex_id } } = build
   DB.query(`
     INSERT INTO exco (name, uid, eq_id, mu_id, ex_id)
     VALUES ('${_(name)}', '${_(uid)}', '${_(eq_id)}', '${_(mu_id)}', '${_(ex_id)}');
     `,
     (error, results) => {
       if (error) console.log(error)
-      console.log(`Record successfully inserted`);
+      console.log(`Record successfully inserted into exco (${name})`);
       res.json(results)
     })
 })
 
 
+// ------------------------------------------------------------- //
+// INSERT INTO circ with name, uid
+// INSERT INTO circ_movs with circ_id, mov_id, duration
+router.post('/post/circ', async (req, res) => {
+  const { uid, build } = req.body
+  const { name, movements } = build
+  DB.query(`
+    INSERT INTO circ (name, uid)
+    VALUES ('${_(name)}', '${_(uid)}');
+    `,
+    (error, results) => {
+      if (error) console.log(error)
+      console.log(`Record successfully inserted into circ (${name})`);
+      const circ_id = results.insertId
+      movements.forEach(mov => {
+        const mo_id = mov.id
+        const duration = `${mov.durationValue} ${mov.durationType}`
+        DB.query(`
+          INSERT INTO circ_movs (circ_id, mo_id, duration)
+          VALUES ('${_(circ_id)}', '${_(mo_id)}', '${_(duration)}');
+          `,
+          (errorTWO) => {
+            if (error) console.log(errorTWO)
+            console.log(`Record relations successfully inserted`);
+          })
+      })
+      res.json(results)
+    })
+})
+
 
 // ------------------------------------------------------------- //
 // INSERT INTO woco with name and uid
-// INSERT INTO woco with woco_id, exco_id, reps, sets, weight
+// INSERT INTO woco_excos with woco_id, exco_id, reps, sets, weight
+// INSERT INTO woco_circs with woco_id, circ_id, sets
 router.post('/post/woco', async (req, res) => {
-  const { name, id: woco_id, uid, woco_excos } = req.body
+  const { uid, build } = req.body
+  const { name, exercises, circuits } = build
   DB.query(`
     INSERT INTO woco (name, uid)
     VALUES ('${_(name)}', '${_(uid)}');
     `, (error, results) => {
+    const woco_id = results.insertId
     if (error) console.log(error)
-    console.log(`Record successfully inserted (woco)`);
-    woco_excos.forEach(({ id: exco_id, sets, reps, weight }) => {
+    console.log(`Record successfully inserted into woco (${name})`);
+    exercises.forEach(({ id: exco_id, sets, reps, weight }) => {
       DB.query(`
           INSERT INTO woco_excos (woco_id, exco_id, sets, reps, weight)
           VALUES ('${_(woco_id)}', '${_(exco_id)}', '${_(sets)}', '${_(reps)}', '${_(weight)}');
           `,
-        (error, results) => {
+        (error) => {
           if (error) console.log(error)
           console.log(`Record successfully inserted (woco_exco)`);
         })
     });
+    console.log(`Record successfully inserted into woco (${name})`);
+    circuits.forEach(({ id: circ_id, sets }) => {
+      DB.query(`
+          INSERT INTO woco_circs (woco_id,  circ_id, sets)
+          VALUES ('${_(woco_id)}', '${_(circ_id)}', '${_(sets)}');
+          `,
+        (error) => {
+          if (error) console.log(error)
+          console.log(`Record successfully inserted (woco_circ)`);
+        })
+    });
+    if (error) console.log(error)
     res.json(results)
   })
 })
-
 
 module.exports = router

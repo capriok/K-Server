@@ -14,23 +14,23 @@ mysql.connect(() => console.log('MySQL connected successfully'))
 app.use(express.json())
 
 //Disarray Leaderboard Entry Route
-const leaderboardRouter = require('./routes/leaderboardEntry')
+const leaderboardRouter = require('./routes/Disarray/leaderboard')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 //API Routes
-const SQLiftingRouter = require('./routes/sqlifting-api')
+const SQLiftingRouter = require('./routes/SQLifting/api')
 app.use('/.netlify/functions/server/sqlifting/api', SQLiftingRouter)
 
 // SQLifting Login / Register
-const SQLiftingAccRouter = require('./routes/sqlifting-account.js')
+const SQLiftingAccRouter = require('./routes//SQLifting/account.js')
 app.use('/.netlify/functions/server/sqlifting', SQLiftingAccRouter)
 
 //Personal Portfolio Email Dispatch Route
-const PortfolioEmailRouter = require('./routes/portfolio-email.js')
+const PortfolioEmailRouter = require('./routes/Portfolio/email.js')
 app.use('/.netlify/functions/server/portfolioemail', PortfolioEmailRouter)
 
 //Keith Phillingane LLC Client Email Dispatch Route
-const KPClientEmailRouter = require('./routes/kpcon-email.js');
+const KPClientEmailRouter = require('./routes/KP-Construction/email.js');
 app.use('/.netlify/functions/server/kpclientemail', KPClientEmailRouter)
 
 //EXPORTS

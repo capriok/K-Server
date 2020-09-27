@@ -3,7 +3,7 @@ const HOST = process.env.MYSQLHOST
 const PASS = process.env.MYSQLPASS
 
 //RDS
-// const pool = mysql.createPool({
+// const connection = mysql.createConnection({
 //   user: 'admin',
 //   password: PASS,
 //   database: 'sqlifting',

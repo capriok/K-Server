@@ -1,9 +1,9 @@
 const router = require('express').Router();
-const DB = require("../database/mysqldb");
+const DB = require("../../database/mysqldb");
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
-const { cors, corsOptions } = require('../cors/cors')
+const { cors, corsOptions } = require('../../cors/cors')
 var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app', 'https://sqlifting.kylecaprio.dev']
 
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const nodemailer = require('nodemailer')
-const { cors, corsOptions } = require('../cors/cors')
+const { cors, corsOptions } = require('../../cors/cors')
 var whitelist = ['http://localhost:3000', 'https://www.kylecaprio.dev']
 require('dotenv').config()
 

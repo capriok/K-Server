@@ -1,6 +1,6 @@
 const router = require('express').Router()
-let Entry = require('../models/entry.model.js')
-const { cors, corsOptions } = require('../cors/cors')
+let Entry = require('../../schemas/leaderboard.schema.js')
+const { cors, corsOptions } = require('../../cors/cors')
 const whitelist = ['http://localhost:3000', 'https://disarray.netlify.app', 'https://disarray.kylecaprio.dev']
 
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {
