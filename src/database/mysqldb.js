@@ -17,7 +17,7 @@ const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: PASS,
-  database: 'sqlifting',
+  database: 'sqliftingv2',
   multipleStatements: true
 });
 
