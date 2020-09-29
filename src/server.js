@@ -14,7 +14,7 @@ mysql.connect(() => console.log('MySQL connected successfully'))
 app.use(express.json())
 
 //Disarray Leaderboard Entry Route
-const leaderboardRouter = require('./routes/Disarray/leaderboard')
+const leaderboardRouter = require('./routes/DisArray/leaderboard')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 //API Routes
