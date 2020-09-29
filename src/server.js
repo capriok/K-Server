@@ -18,7 +18,7 @@ const leaderboardRouter = require('./routes/Disarray/leaderboard')
 app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
 
 //API Routes
-const SQLiftingRouter = require('./routes/SQLifting/apiv2')
+const SQLiftingRouter = require('./routes/SQLifting/api')
 app.use('/.netlify/functions/server/sqlifting/api', SQLiftingRouter)
 
 // SQLifting Login / Register

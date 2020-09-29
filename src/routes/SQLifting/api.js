@@ -1,6 +1,4 @@
 const router = require('express').Router();
-const mysql = require('mysql');
-const DB = require("../../database/mysqldb");
 const queries = require('../../models/queries')
 
 // ----------------------------------------------------------------------
