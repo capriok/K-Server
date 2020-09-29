@@ -140,21 +140,21 @@ const statements = {
 			INSERT INTO circ (name, uid)
 			VALUES ('${name}', '${uid}');
 		`,
-		circ_movs: (circ_id, mo_id, duration) => `
+		circ_movs: (values) => `
 			INSERT INTO circ_movs (circ_id, mo_id, duration)
-			VALUES ('${circ_id}', '${mo_id}', '${duration}');
+			VALUES ${values};
 		`,
 		woco: (name, uid) => `
 			INSERT INTO woco (name, uid)
 			VALUES ('${name}', '${uid}');
 		`,
-		woco_excos: (woco_id, exco_id, sets, reps, weight) => `
+		woco_excos: (values) => `
 			INSERT INTO woco_excos (woco_id, exco_id, sets, reps, weight)
-      VALUES ('${woco_id}', '${exco_id}', '${sets}', '${reps}', '${weight}');
+			VALUES ${values};
 		`,
-		woco_circs: (woco_id, circ_id, sets) => `
+		woco_circs: (values) => `
 			INSERT INTO woco_circs (woco_id,  circ_id, sets)
-			VALUES ('${woco_id}', '${circ_id}', '${sets}');
+			VALUES ${values};
 		`,
 	},
 	// -------------------------------------
@@ -243,8 +243,8 @@ module.exports = {
 		circ: (name, uid) => {
 			return query(statements.post.circ(name, uid))
 		},
-		circ_movs: (circ_id, mop_id, duration) => {
-			return query(statements.post.circ_movs(circ_id, mop_id, duration))
+		circ_movs: (values) => {
+			return query(statements.post.circ_movs(values))
 		},
 		woco: (name, uid) => {
 			return query(statements.post.woco(name, uid)
