@@ -21,13 +21,15 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
 // ----------------------------------------------------------------------
 const composeCirc_movsValues = (arr, circ_id) => {
 	let values = [arr.map(a => {
-		return `(${circ_id}, ${a.id}, '${a.durationValue.toString()} ${a.durationType}')`
+		let duration = () => { return `${a.durationValue.toString()} ${a.durationType}` }
+		return `(${circ_id}, ${a.id}, '${duration()}')`
 	})].toString()
 	return values
 }
 const composeWoco_excoORcircValues = (arr, woco_id, type) => {
 	let values = [arr.map(a => {
-		return `(${woco_id}, ${a.id}, ${a.sets}${type === 'exco' ? `, ${a.reps}, ${a.weight}` : ``})`
+		let excoVals = () => { if (type === 'exco') { return `, ${a.reps}, ${a.weight}` } else { return '' } }
+		return `(${woco_id}, ${a.id}, ${a.sets}${excoVals()})`
 	})].toString()
 	return values
 }
@@ -36,7 +38,6 @@ const composeWoco_excoORcircValues = (arr, woco_id, type) => {
 // 			 			SORT RESOLVED ARRAY BY NAME
 // ----------------------------------------------------------------------
 const sortByName = (res) => res.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
-
 
 // ----------------------------------------------------------------------
 // 			 			GET METHODS
