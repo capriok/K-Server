@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const queries = require('../../models/queries')
+const queries = require('../../models/api-queries')
 
 // ----------------------------------------------------------------------
 // 			 			CORS

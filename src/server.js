@@ -13,25 +13,28 @@ mysql.connect(() => console.log('MySQL connected successfully'))
 
 app.use(express.json())
 
+
+let netlifyEndpoint = '/.netlify/functions/server'
+
 //Disarray Leaderboard Entry Route
 const leaderboardRouter = require('./routes/DisArray/leaderboard')
-app.use('/.netlify/functions/server/leaderboard', leaderboardRouter)
+app.use(`${netlifyEndpoint}/leaderboard`, leaderboardRouter)
 
 //API Routes
 const SQLiftingRouter = require('./routes/SQLifting/api')
-app.use('/.netlify/functions/server/sqlifting/api', SQLiftingRouter)
+app.use(`${netlifyEndpoint}/sqlifting/api`, SQLiftingRouter)
 
 // SQLifting Login / Register
-const SQLiftingAccRouter = require('./routes//SQLifting/account.js')
-app.use('/.netlify/functions/server/sqlifting', SQLiftingAccRouter)
+const SQLiftingAccRouter = require('./routes/SQLifting/acc.js')
+app.use(`${netlifyEndpoint}/sqlifting/acc`, SQLiftingAccRouter)
 
 //Personal Portfolio Email Dispatch Route
 const PortfolioEmailRouter = require('./routes/Portfolio/email.js')
-app.use('/.netlify/functions/server/portfolioemail', PortfolioEmailRouter)
+app.use(`${netlifyEndpoint}/portfolioemail`, PortfolioEmailRouter)
 
 //Keith Phillingane LLC Client Email Dispatch Route
 const KPClientEmailRouter = require('./routes/KP-Construction/email.js');
-app.use('/.netlify/functions/server/kpclientemail', KPClientEmailRouter)
+app.use(`${netlifyEndpoint}/kpclientemail`, KPClientEmailRouter)
 
 //EXPORTS
 module.exports = app;
