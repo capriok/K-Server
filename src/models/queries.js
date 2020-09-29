@@ -1,12 +1,12 @@
 const DB = require("../database/mysqldb");
 
 // -------------------------------------------------------------
-// 					STATEMENTS
+// 		 				STATEMENTS
 // -------------------------------------------------------------
 
 const statements = {
 	// -------------------------------------
-	// 					GET
+	// 			GET
 	// -------------------------------------
 	get: {
 		equipments: (uid) => `
@@ -125,7 +125,7 @@ const statements = {
 		`,
 	},
 	// -------------------------------------
-	// 					POST
+	// 			POST
 	// -------------------------------------
 	post: {
 		composition: (table, name, uid) => `
@@ -158,7 +158,7 @@ const statements = {
 		`,
 	},
 	// -------------------------------------
-	// 					UPDATE
+	// 			UPDATE
 	// -------------------------------------
 	update: {
 		name: (table, name, id, uid) => `
@@ -169,7 +169,7 @@ const statements = {
 		`,
 	},
 	// -------------------------------------
-	// 					DELTE
+	// 			DELTE
 	// -------------------------------------
 	delete: {
 		byId: (table, ids, uid) => `
@@ -193,7 +193,7 @@ const statements = {
 }
 
 // -------------------------------------------------------------
-// 					MYSQL QUERY RETURNING AS PROMISE
+// 			MYSQL QUERY RETURNING AS PROMISE
 // -------------------------------------------------------------
 
 const query = async (statement) => {
@@ -206,7 +206,7 @@ const query = async (statement) => {
 }
 
 // -------------------------------------------------------------
-// 					EXPORT METHODS TO CALL QUERY FUNCTION
+// 			EXPORT METHODS TO CALL QUERY FUNCTION
 // -------------------------------------------------------------
 
 module.exports = {

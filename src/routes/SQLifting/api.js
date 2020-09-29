@@ -2,7 +2,7 @@ const router = require('express').Router();
 const queries = require('../../models/queries')
 
 // ----------------------------------------------------------------------
-// 					CORS
+// 			 			CORS
 // ----------------------------------------------------------------------
 var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app', 'https://sqlifting.kylecaprio.dev']
 const { cors, corsOptions } = require('../../cors/cors');
@@ -17,12 +17,11 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
 });
 
 // ----------------------------------------------------------------------
-// 					COMPOSE VALUES INTO SQL MULPTIPLE INSERT SYNTAX
+// 			 			COMPOSE VALUES INTO SQL MULPTIPLE INSERT SYNTAX
 // ----------------------------------------------------------------------
 const composeCirc_movsValues = (arr, circ_id) => {
 	let values = [arr.map(a => {
-		let duration = `${a.durationValue.toString()} ${a.durationType}`
-		return `(${circ_id}, ${a.id}, '${duration}')`
+		return `(${circ_id}, ${a.id}, '${a.durationValue.toString()} ${a.durationType}')`
 	})].toString()
 	return values
 }
@@ -34,17 +33,17 @@ const composeWoco_excoORcircValues = (arr, woco_id, type) => {
 }
 
 // ----------------------------------------------------------------------
-// 					SORT RESOLVED ARRAY BY NAME
+// 			 			SORT RESOLVED ARRAY BY NAME
 // ----------------------------------------------------------------------
 const sortByName = (res) => res.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
 
 
 // ----------------------------------------------------------------------
-//																GET METHODS
+// 			 			GET METHODS
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------
-// 					GET EQUIPMENTS BY UID
+// 			GET EQUIPMENTS BY UID
 // ----------------------------------------------
 router.get('/equipments/:uid', async (req, res) => {
 	const { uid } = req.params
@@ -62,7 +61,7 @@ router.get('/equipments/:uid', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					GET MUSCLES BY UID
+// 			GET MUSCLES BY UID
 // ----------------------------------------------
 router.get('/muscles/:uid', async (req, res) => {
 	const { uid } = req.params
@@ -80,7 +79,7 @@ router.get('/muscles/:uid', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					GET EXERCISES BY UID
+// 			GET EXERCISES BY UID
 // ----------------------------------------------
 router.get('/exercises/:uid', async (req, res) => {
 	const { uid } = req.params
@@ -98,7 +97,7 @@ router.get('/exercises/:uid', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					GET MOVEMENTS BY UID
+// 			GET MOVEMENTS BY UID
 // ----------------------------------------------
 router.get('/movements/:uid', async (req, res) => {
 	const { uid } = req.params
@@ -116,7 +115,7 @@ router.get('/movements/:uid', async (req, res) => {
 })
 
 // // ----------------------------------------------
-// 					GET EXCOS BY UID
+// 			GET EXCOS BY UID
 // // ----------------------------------------------
 router.get('/excos/:uid', async (req, res) => {
 	const { uid } = req.params
@@ -134,7 +133,7 @@ router.get('/excos/:uid', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					GET CIRCS BY UID
+// 			GET CIRCS BY UID
 // ----------------------------------------------
 router.get('/circs/:uid', async (req, res) => {
 	const { uid } = req.params
@@ -152,7 +151,7 @@ router.get('/circs/:uid', async (req, res) => {
 })
 
 // // ----------------------------------------------
-// 					GET WOCOS BY UID
+// 			GET WOCOS BY UID
 // // ----------------------------------------------
 router.get('/wocos/:uid', async (req, res) => {
 	const uid = req.params.uid
@@ -171,11 +170,11 @@ router.get('/wocos/:uid', async (req, res) => {
 })
 
 // ----------------------------------------------------------------------
-//																POST METHODS
+// 			 			POST METHODS
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------
-// 					POST COMPOSITION
+// 			POST COMPOSITION
 // ----------------------------------------------
 router.post('/composition', async (req, res) => {
 	const { table, name, uid } = req.body
@@ -188,7 +187,7 @@ router.post('/composition', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					POST EXCO
+// 			POST EXCO
 // ----------------------------------------------
 router.post('/exco', async (req, res) => {
 	const { build, uid } = req.body
@@ -202,7 +201,7 @@ router.post('/exco', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					POST CIRC
+// 			POST CIRC
 // ----------------------------------------------
 
 
@@ -226,7 +225,7 @@ router.post('/circ', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					POST WOCO
+// 			POST WOCO
 // ----------------------------------------------
 
 router.post('/woco', async (req, res) => {
@@ -256,11 +255,11 @@ router.post('/woco', async (req, res) => {
 })
 
 // ----------------------------------------------------------------------
-//																UPDATE METHODS
+// 			 			UPDATE METHODS
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------
-// 					UPDATE NAME
+// 			UPDATE NAME
 // ----------------------------------------------
 router.post('/updateName', async (req, res) => {
 	const { table, name, id, uid } = req.body
@@ -273,11 +272,11 @@ router.post('/updateName', async (req, res) => {
 })
 
 // ----------------------------------------------------------------------
-//																DELTE METHODS
+// 			 			DELTE METHODS
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------
-// 					DELETE BY ID
+// 			DELETE BY ID
 // ----------------------------------------------
 router.post('/byId', async (req, res) => {
 	const { table, ids, uid } = req.body
@@ -291,7 +290,7 @@ router.post('/byId', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					DELETE CIRC_MOVS
+// 			DELETE CIRC_MOVS
 // ----------------------------------------------
 router.post('/circ_movs', async (req, res) => {
 	const { ids } = req.body
@@ -305,7 +304,7 @@ router.post('/circ_movs', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					DELETE WOCO_EXCOS
+// 			DELETE WOCO_EXCOS
 // ----------------------------------------------
 router.post('/woco_excos', async (req, res) => {
 	const { ids } = req.body
@@ -319,7 +318,7 @@ router.post('/woco_excos', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 					DELETE WOCO_CIRCS
+// 			DELETE WOCO_CIRCS
 // ----------------------------------------------
 router.post('/woco_circs', async (req, res) => {
 	const { ids } = req.body
