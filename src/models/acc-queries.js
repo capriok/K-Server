@@ -15,7 +15,29 @@ const statements = {
 			WHERE username = '${username}'
 			AND password LIKE BINARY '${password}'
 		`,
-
+		profile: (uid) => `
+			SELECT JSON_OBJECT(
+			'username', u.username,
+			'join_date', u.join_date,
+			'icon', up.icon,
+				'first_name', up.first_name,
+				'last_name', up.last_name,
+				'followers', ( SELECT 
+						COUNT(*) as following 
+						FROM user_followers 
+						WHERE following_uid = ${uid}
+					),
+					'following', ( SELECT COUNT(*) as followers 
+						FROM user_followers 
+						WHERE follower_uid = ${uid}
+					)
+		) as profile
+		FROM user u
+		INNER JOIN user_profiles up
+		ON up.uid = 1
+		AND u.uid = 1
+		LIMIT 1;
+	`
 	},
 	// -------------------------------------
 	// 			POST
@@ -23,9 +45,12 @@ const statements = {
 	post: {
 		user: (username, password, date) => `
 			INSERT INTO user (username, password, join_date)
-			VALUES('${username}', '${password}', '${date}')
+			VALUES('${username}', '${password}', '${date}');
 		`,
-
+		user_profile: (uid, first_name, last_name, icon, bio) => `
+			INSERT INTO user_profiles (uid, first_name, last_name, icon, bio)
+			VALUES('${uid}', '${first_name}', '${last_name}', '${icon}', '${bio}');
+	`
 	},
 	// -------------------------------------
 	// 			UPDATE
@@ -34,8 +59,13 @@ const statements = {
 		name: (name, uid) => `
 			UPDATE user
 			SET name = '${name}'
-			WHERE id = ${uid};
+			WHERE uid = ${uid};
 		`,
+		icon: (icon, uid) => `
+			UPDATE user_profiles
+			SET icon = '${icon}'
+			WHERE uid = ${uid};
+	`
 	},
 	// -------------------------------------
 	// 			DELTE
@@ -43,7 +73,7 @@ const statements = {
 	delete: {
 		byId: (uid) => `
 			DELETE FROM user
-			WHERE id = ${uid};
+			WHERE uid = ${uid};
 		`,
 	},
 }
@@ -70,15 +100,24 @@ module.exports = {
 		user: (username, password) => {
 			return query(statements.get.user(username, password))
 		},
+		profile: (uid) => {
+			return query(statements.get.profile(uid))
+		}
 	},
 	post: {
 		user: (username, password, date) => {
 			return query(statements.post.user(username, password, date))
+		},
+		user_profile: (uid, first_name, last_name, icon, bio) => {
+			return query(statements.post.user_profile(uid, first_name, last_name, icon, bio))
 		}
 	},
 	update: {
 		name: (name, uid) => {
 			return query(statements.update.name(name, uid))
+		},
+		icon: (icon, uid) => {
+			return query(statements.update.icon(icon, uid))
 		}
 	},
 	delete: {

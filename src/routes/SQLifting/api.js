@@ -334,7 +334,3 @@ router.post('/woco_circs', async (req, res) => {
 })
 
 module.exports = router
-
-String.prototype.capitalize = function () {
-	return this.charAt(0).toUpperCase() + this.slice(1);
-}

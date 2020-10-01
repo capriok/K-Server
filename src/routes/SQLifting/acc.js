@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const DB = require("../../database/mysqldb");
+const path = require('path')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
 const queries = require('../../models/acc-queries')
@@ -9,7 +9,6 @@ const queries = require('../../models/acc-queries')
 // ----------------------------------------------------------------------
 var whitelist = ['http://localhost:3000', 'https://sqlifting.netlify.app', 'https://sqlifting.kylecaprio.dev']
 const { cors, corsOptions } = require('../../cors/cors');
-
 router.use(cors(corsOptions(whitelist)), (req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   if (req.method === "OPTIONS") {
@@ -18,6 +17,34 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
   }
   next();
 });
+// ----------------------------------------------------------------------
+// 			 			MULTER UPLOAD
+// ----------------------------------------------------------------------
+const multer = require('multer')
+const storage = multer.diskStorage({
+  destination: './local/user/icon',
+  filename: (req, file, cb) => {
+    cb(null, `uid${req.body.uid}-${path.extname(file.originalname)}`)
+  }
+})
+const upload = multer({ storage })
+
+// ----------------------------------------------------------------------
+// 			 			GAYZO UPLOAD
+// ----------------------------------------------------------------------
+
+const Gyazo = require('gyazo-api');
+const G = new Gyazo('b7850ec374055ef3470b51c1b0842adf41ce21b09debf9cfcc4cb253d0326b9f')
+const GayzoUpload = (file) => {
+  return new Promise((resolve, reject) => {
+    G.upload(file.path)
+      .then(res => {
+        resolve(`https://i.gyazo.com/${res.data.image_id}${path.extname(file.originalname)}`)
+      })
+      .catch(err => reject(err))
+  })
+}
+
 
 // ----------------------------------------------------------------------
 // 			 			GET METHODS
@@ -30,21 +57,44 @@ router.get('/user', async (req, res) => {
   const { username, password } = req.query;
   queries.get.user(username, password)
     .then(results => {
-      console.log(results);
+      console.log('Attempting to login...');
       const matchedUsername = results.length > 0
       if (matchedUsername) {
-        console.log('Account found');
+        console.log(`Successfully found user             uid (${results[0].uid})`);
         const user = {
           uid: results[0].uid,
           username: results[0].username
         }
         console.table(results)
         const token = jwt.sign(user, process.env.SECRET)
+        console.log(`Successfully signed token           uid (${results[0].uid})`);
         res.send({ user, token })
       } else {
         console.log('Login attempt failed');
         res.status(400).end();
       }
+    })
+    .catch(err => console.log(err))
+})
+
+// ----------------------------------------------
+// 			GET PROFILE BY UID
+// ----------------------------------------------
+router.get('/profile/:uid', async (req, res) => {
+  const { uid } = req.params;
+  queries.get.profile(uid)
+    .then(results => {
+      console.log(`Successfully fetched Profile Data   uid (${uid})`)
+      const profile = JSON.parse(results[0].profile)
+      const parsedUsername = profile.username.capitalize()
+      const parsedDate = new Date(profile.join_date).toLocaleDateString('en-US', { timeZone: 'UTC' })
+      let payload = {
+        username: parsedUsername,
+        join_date: parsedDate,
+        ...profile
+      }
+      // console.log(payload);
+      res.json(payload)
     })
     .catch(err => console.log(err))
 })
@@ -62,7 +112,11 @@ router.post('/user', async (req, res) => {
   const date = moment().format('YYYY-MM-DD H:mm:ss');
   queries.post.user(username, password, date)
     .then(results => {
-      console.table(results)
+      console.log(`Successfully created user           uid (${results.insertId})`);
+      queries.post.user_profile(results.insertId, '', '', null, '')
+        .then(() => console.log(`Successfully created user_profile   uid (${results.insertId})`))
+        .catch(err => console.log(err))
+
       res.send("Account created");
     })
     .catch(err => {
@@ -75,6 +129,7 @@ router.post('/user', async (req, res) => {
     }
     )
 })
+
 
 // ----------------------------------------------------------------------
 // 			 			UPDATE METHODS
@@ -90,6 +145,27 @@ router.post('/updateName', async (req, res) => {
       res.json(results)
     })
     .catch(err => console.log(err))
+})
+
+// ----------------------------------------------
+// 			UPDATE NAME
+// ----------------------------------------------
+router.post('/updateIcon', upload.single('icon'), async (req, res) => {
+  const file = req.file
+  const uid = req.body.uid
+
+  GayzoUpload(file)
+    .then((imageURL) => {
+      queries.update.icon(imageURL, uid)
+        .then(results => {
+          console.log(`Successfully updated Profile Icon   uid (${results.insertId})`)
+          results.data = imageURL
+          res.json(results)
+        })
+        .catch(err => console.log(err))
+    })
+    .catch(err => console.log(err))
+
 })
 
 // ----------------------------------------------------------------------

@@ -13,7 +13,6 @@ mysql.connect(() => console.log('MySQL connected successfully'))
 
 app.use(express.json())
 
-
 let netlifyEndpoint = '/.netlify/functions/server'
 
 //Disarray Leaderboard Entry Route
