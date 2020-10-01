@@ -86,14 +86,14 @@ router.get('/profile/:uid', async (req, res) => {
     .then(results => {
       console.log(`Successfully fetched Profile Data   uid (${uid})`)
       const profile = JSON.parse(results[0].profile)
-      const parsedUsername = profile.username.capitalize()
-      const parsedDate = new Date(profile.join_date).toLocaleDateString('en-US', { timeZone: 'UTC' })
+      const formattedDate = moment(profile.join_date).format('LL');
+      const formattedBirthday = moment(profile.birthday).format('LL');
       let payload = {
-        username: parsedUsername,
-        join_date: parsedDate,
-        ...profile
+        ...profile,
+        join_date: formattedDate,
+        birthday: formattedBirthday
       }
-      // console.log(payload);
+      console.log('Profile Payload', payload);
       res.json(payload)
     })
     .catch(err => console.log(err))
@@ -109,7 +109,7 @@ router.get('/profile/:uid', async (req, res) => {
 router.post('/user', async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
-  const date = moment().format('YYYY-MM-DD H:mm:ss');
+  const date = moment().format('YYYY-MM-DD');
   queries.post.user(username, password, date)
     .then(results => {
       console.log(`Successfully created user           uid (${results.insertId})`);
@@ -150,22 +150,50 @@ router.post('/updateName', async (req, res) => {
 // ----------------------------------------------
 // 			UPDATE NAME
 // ----------------------------------------------
-router.post('/updateIcon', upload.single('icon'), async (req, res) => {
+router.post('/updateProfile', upload.single('icon'), async (req, res) => {
   const file = req.file
-  const uid = req.body.uid
+  const { uid } = req.body
 
-  GayzoUpload(file)
-    .then((imageURL) => {
-      queries.update.icon(imageURL, uid)
-        .then(results => {
-          console.log(`Successfully updated Profile Icon   uid (${results.insertId})`)
-          results.data = imageURL
-          res.json(results)
-        })
-        .catch(err => console.log(err))
-    })
-    .catch(err => console.log(err))
+  let body = {}
+  // Removes undefined values from req.body
+  const reqKeys = Object.keys(req.body)
+  reqKeys.forEach(key => {
+    if (key !== 'uid' && key !== 'icon') {
+      if (req.body[key] !== 'undefined' && req.body[key] !== '') {
+        body[key] = req.body[key]
+      }
+    }
+  })
+  const values = []
+  // composes values for SQL multiple update syntax
+  const bodyKeys = Object.keys(body)
+  bodyKeys.forEach((key, i) => {
+    let value = `${i === 0 ? '' : ' '}${key} = '${body[key]}'`
+    values.push(value)
+  })
 
+  if (bodyKeys.length > 0) {
+    queries.update.profile(values.toString(), uid)
+      .then(results => {
+        console.log(`Successfully updated Profile Data   uid (${results.insertId})`)
+        !file && res.json(results)
+      })
+      .catch(err => console.log(err))
+  }
+
+  if (file) {
+    GayzoUpload(file)
+      .then((imageURL) => {
+        queries.update.icon(imageURL, uid)
+          .then(results => {
+            console.log(`Successfully updated Profile Icon   uid (${results.insertId})`)
+            results.data = imageURL
+            res.json(results)
+          })
+          .catch(err => console.log(err))
+      })
+      .catch(err => console.log(err))
+  }
 })
 
 // ----------------------------------------------------------------------

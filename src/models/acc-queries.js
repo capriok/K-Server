@@ -17,26 +17,28 @@ const statements = {
 		`,
 		profile: (uid) => `
 			SELECT JSON_OBJECT(
-			'username', u.username,
-			'join_date', u.join_date,
-			'icon', up.icon,
-				'first_name', up.first_name,
-				'last_name', up.last_name,
-				'followers', ( SELECT 
-						COUNT(*) as following 
-						FROM user_followers 
-						WHERE following_uid = ${uid}
-					),
-					'following', ( SELECT COUNT(*) as followers 
-						FROM user_followers 
-						WHERE follower_uid = ${uid}
-					)
-		) as profile
-		FROM user u
-		INNER JOIN user_profiles up
-		ON up.uid = 1
-		AND u.uid = 1
-		LIMIT 1;
+				'username', u.username,
+				'join_date', u.join_date,
+				'icon', p.icon,
+						'first_name', p.first_name,
+						'last_name', p.last_name,
+						'email', p.email,
+						'birthday', p.birthday,
+						'location', p.location,
+						'followers', (SELECT COUNT(*) as following 
+					FROM user_followers 
+					WHERE following_uid = 1
+						),
+				'following', (SELECT COUNT(*) as followers 
+					FROM user_followers 
+					WHERE follower_uid = 1
+						)
+			) as profile
+			FROM user u
+			INNER JOIN user_profiles p
+			ON p.uid = 1
+			AND u.uid = 1
+			LIMIT 1;
 	`
 	},
 	// -------------------------------------
@@ -47,9 +49,9 @@ const statements = {
 			INSERT INTO user (username, password, join_date)
 			VALUES('${username}', '${password}', '${date}');
 		`,
-		user_profile: (uid, first_name, last_name, icon, bio) => `
-			INSERT INTO user_profiles (uid, first_name, last_name, icon, bio)
-			VALUES('${uid}', '${first_name}', '${last_name}', '${icon}', '${bio}');
+		user_profile: (uid, first_name, last_name, icon, status) => `
+			INSERT INTO user_profiles (uid, first_name, last_name, icon, status)
+			VALUES('${uid}', '${first_name}', '${last_name}', '${icon}', '${status}');
 	`
 	},
 	// -------------------------------------
@@ -65,7 +67,12 @@ const statements = {
 			UPDATE user_profiles
 			SET icon = '${icon}'
 			WHERE uid = ${uid};
-	`
+		`,
+		profile: (values, uid) => `
+			UPDATE user_profiles
+			SET ${values}
+			WHERE uid = ${uid};
+		`
 	},
 	// -------------------------------------
 	// 			DELTE
@@ -108,8 +115,8 @@ module.exports = {
 		user: (username, password, date) => {
 			return query(statements.post.user(username, password, date))
 		},
-		user_profile: (uid, first_name, last_name, icon, bio) => {
-			return query(statements.post.user_profile(uid, first_name, last_name, icon, bio))
+		user_profile: (uid, first_name, last_name, icon, status) => {
+			return query(statements.post.user_profile(uid, first_name, last_name, icon, status))
 		}
 	},
 	update: {
@@ -118,6 +125,9 @@ module.exports = {
 		},
 		icon: (icon, uid) => {
 			return query(statements.update.icon(icon, uid))
+		},
+		profile: (values, uid) => {
+			return query(statements.update.profile(values, uid))
 		}
 	},
 	delete: {
