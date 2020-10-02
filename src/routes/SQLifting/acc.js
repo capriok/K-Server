@@ -32,7 +32,6 @@ const upload = multer({ storage })
 // ----------------------------------------------------------------------
 // 			 			GAYZO UPLOAD
 // ----------------------------------------------------------------------
-
 const Gyazo = require('gyazo-api');
 const G = new Gyazo('b7850ec374055ef3470b51c1b0842adf41ce21b09debf9cfcc4cb253d0326b9f')
 const GayzoUpload = (file) => {
@@ -43,6 +42,24 @@ const GayzoUpload = (file) => {
       })
       .catch(err => reject(err))
   })
+}
+
+// ----------------------------------------------------------------------
+// 			 			COMPOSE VALUES INTO SQL MULTIPLE UPDATE SYNTAX
+// ----------------------------------------------------------------------
+const composeUpdateProfileValues = (body) => {
+  delete body.uid
+  delete body.icon
+  for (let prop in body) {
+    if (body[prop] === 'undefined' || body[prop] === '') {
+      delete body[prop]
+    }
+  }
+  let keys = Object.keys(body)
+  let values = [keys.map((key, i) => {
+    return `${i === 0 ? '' : ' '}${key} = '${body[key]}'`
+  })]
+  return values.toString()
 }
 
 
@@ -86,12 +103,16 @@ router.get('/profile/:uid', async (req, res) => {
     .then(results => {
       console.log(`Successfully fetched Profile Data   uid (${uid})`)
       const profile = JSON.parse(results[0].profile)
+      const parsedFollowers = JSON.parse(profile.followers)
+      const parsedFollowing = JSON.parse(profile.following)
       const formattedDate = moment(profile.join_date).format('LL');
-      const formattedBirthday = moment(profile.birthday).format('LL');
+      const formattedBirthday = profile.birthday !== null ? moment(profile.birthday).format('LL') : null;
       let payload = {
         ...profile,
         join_date: formattedDate,
-        birthday: formattedBirthday
+        birthday: formattedBirthday,
+        followers: parsedFollowers,
+        following: parsedFollowing
       }
       console.log('Profile Payload', payload);
       res.json(payload)
@@ -130,6 +151,18 @@ router.post('/user', async (req, res) => {
     )
 })
 
+// ----------------------------------------------
+// 			POST USER BY FOLLOWING_UID, FOLOWER_UID DATE
+// ----------------------------------------------
+router.post('/follower', async (req, res) => {
+  const { following_uid, follower_uid } = req.body
+  const follow_date = moment().format('YYYY-MM-DD');
+  queries.post.user_follower(following_uid, follower_uid, follow_date)
+    .then(results => {
+      res.json(results)
+    })
+    .catch(err => console.log(err.code))
+})
 
 // ----------------------------------------------------------------------
 // 			 			UPDATE METHODS
@@ -150,37 +183,23 @@ router.post('/updateName', async (req, res) => {
 // ----------------------------------------------
 // 			UPDATE NAME
 // ----------------------------------------------
+
 router.post('/updateProfile', upload.single('icon'), async (req, res) => {
   const file = req.file
   const { uid } = req.body
-
-  let body = {}
-  // Removes undefined values from req.body
-  const reqKeys = Object.keys(req.body)
-  reqKeys.forEach(key => {
-    if (key !== 'uid' && key !== 'icon') {
-      if (req.body[key] !== 'undefined' && req.body[key] !== '') {
-        body[key] = req.body[key]
-      }
-    }
-  })
-  const values = []
-  // composes values for SQL multiple update syntax
-  const bodyKeys = Object.keys(body)
-  bodyKeys.forEach((key, i) => {
-    let value = `${i === 0 ? '' : ' '}${key} = '${body[key]}'`
-    values.push(value)
-  })
-
-  if (bodyKeys.length > 0) {
+  let values = composeUpdateProfileValues(req.body)
+  let concatResults = []
+  if (values) {
     queries.update.profile(values.toString(), uid)
       .then(results => {
         console.log(`Successfully updated Profile Data   uid (${results.insertId})`)
-        !file && res.json(results)
+        if (!file) {
+          concatResults.push(results)
+          res.json(results)
+        }
       })
       .catch(err => console.log(err))
   }
-
   if (file) {
     GayzoUpload(file)
       .then((imageURL) => {
@@ -188,10 +207,11 @@ router.post('/updateProfile', upload.single('icon'), async (req, res) => {
           .then(results => {
             console.log(`Successfully updated Profile Icon   uid (${results.insertId})`)
             results.data = imageURL
-            res.json(results)
+            concatResults.push(results)
           })
           .catch(err => console.log(err))
       })
+      .then(() => res.json(concatResults))
       .catch(err => console.log(err))
   }
 })

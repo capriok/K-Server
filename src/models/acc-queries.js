@@ -20,26 +20,75 @@ const statements = {
 				'username', u.username,
 				'join_date', u.join_date,
 				'icon', p.icon,
-						'first_name', p.first_name,
-						'last_name', p.last_name,
-						'email', p.email,
-						'birthday', p.birthday,
-						'location', p.location,
-						'followers', (SELECT COUNT(*) as following 
-					FROM user_followers 
-					WHERE following_uid = 1
+					'first_name', p.first_name,
+					'last_name', p.last_name,
+					'email', p.email,
+					'birthday', p.birthday,
+					'location', p.location,
+					'followers', (SELECT IFNULL(JSON_ARRAYAGG(
+							user.username
+						), "[]") as followers
+						FROM user_followers f 
+								INNER JOIN user
+								ON user.uid = f.follower_uid
+								AND f.following_uid = ${uid}
+					),
+					'following', (SELECT IFNULL(JSON_ARRAYAGG(
+							user.username
+						), "[]") as followers
+						FROM user_followers f 
+						INNER JOIN user user
+						ON user.uid = f.following_uid
+						AND f.follower_uid = ${uid}
+					),
+					'follower_count', (SELECT COUNT(*) as following 
+						FROM user_followers 
+						WHERE following_uid = ${uid}
+					),
+					'following_count', (SELECT COUNT(*) as followers 
+						FROM user_followers 
+						WHERE follower_uid = ${uid}
+					),
+					'data', (SELECT JSON_OBJECT(
+						'equipments', (SELECT COUNT(*) as ammout
+							FROM equipment
+							WHERE uid = ${uid}
 						),
-				'following', (SELECT COUNT(*) as followers 
-					FROM user_followers 
-					WHERE follower_uid = 1
+						'muscles', (SELECT COUNT(*) as ammout
+							FROM muscle
+							WHERE uid = ${uid}
+						),
+						'exercises', (SELECT COUNT(*) as ammout
+							FROM exercise
+							WHERE uid = ${uid}
+						),
+						'movements', (SELECT COUNT(*) as ammout
+							FROM movement
+							WHERE uid = ${uid}
+						),
+						'excos', (SELECT COUNT(*) as ammout
+							FROM exco
+							WHERE uid = ${uid}
+						),
+						'circs', (SELECT COUNT(*) as ammout
+							FROM circ
+							WHERE uid = ${uid}
+						),
+						'wocos', (SELECT COUNT(*) as ammout
+							FROM woco
+							WHERE uid = ${uid}
 						)
+					) as data
+				FROM user
+				WHERE uid = ${uid}
+				)
 			) as profile
 			FROM user u
 			INNER JOIN user_profiles p
-			ON p.uid = 1
-			AND u.uid = 1
+			ON p.uid = ${uid}
+			AND u.uid = ${uid}
 			LIMIT 1;
-	`
+		`
 	},
 	// -------------------------------------
 	// 			POST
@@ -52,7 +101,11 @@ const statements = {
 		user_profile: (uid, first_name, last_name, icon, status) => `
 			INSERT INTO user_profiles (uid, first_name, last_name, icon, status)
 			VALUES('${uid}', '${first_name}', '${last_name}', '${icon}', '${status}');
-	`
+		`,
+		user_follower: (following_uid, follower_uid, follow_date) => `
+			INSERT INTO user_followers (following_uid, follower_uid, follow_date)
+			VALUES('${following_uid}', '${follower_uid}', '${follow_date}');
+		`
 	},
 	// -------------------------------------
 	// 			UPDATE
@@ -117,6 +170,9 @@ module.exports = {
 		},
 		user_profile: (uid, first_name, last_name, icon, status) => {
 			return query(statements.post.user_profile(uid, first_name, last_name, icon, status))
+		},
+		user_follower: (following_uid, follower_uid, follow_date) => {
+			return query(statements.post.user_follower(following_uid, follower_uid, follow_date))
 		}
 	},
 	update: {
