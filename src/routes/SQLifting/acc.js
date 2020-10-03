@@ -24,7 +24,7 @@ const multer = require('multer')
 const storage = multer.diskStorage({
   destination: './local/user/icon',
   filename: (req, file, cb) => {
-    cb(null, `uid${req.body.uid}-${path.extname(file.originalname)}`)
+    cb(null, `uid-${req.body.uid}${path.extname(file.originalname)}`)
   }
 })
 const upload = multer({ storage })
@@ -95,27 +95,61 @@ router.get('/user', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 			GET PROFILE BY UID
+// 			GET PROFILE BY QUERY UID AND UID
 // ----------------------------------------------
-router.get('/profile/:uid', async (req, res) => {
-  const { uid } = req.params;
-  queries.get.profile(uid)
+router.get('/profile/:quid/:uid', async (req, res) => {
+  const { quid, uid } = req.params
+  queries.get.profile(quid, uid)
     .then(results => {
-      console.log(`Successfully fetched Profile Data   uid (${uid})`)
+      console.log(`Successfully fetched Profile        uid (${quid})`)
       const profile = JSON.parse(results[0].profile)
-      const parsedFollowers = JSON.parse(profile.followers)
-      const parsedFollowing = JSON.parse(profile.following)
-      const formattedDate = moment(profile.join_date).format('LL');
+      const formattedJoin_Date = moment(profile.join_date).format('LL');
       const formattedBirthday = profile.birthday !== null ? moment(profile.birthday).format('LL') : null;
+      const parsedisFollowed = profile.isFollowed === 0 ? profile.isFollowed = false : profile.isFollowed = true
       let payload = {
         ...profile,
-        join_date: formattedDate,
+        join_date: formattedJoin_Date,
         birthday: formattedBirthday,
-        followers: parsedFollowers,
-        following: parsedFollowing
+        isFollowed: parsedisFollowed
       }
       console.log('Profile Payload', payload);
       res.json(payload)
+    })
+    .catch(err => console.log(err))
+})
+
+// ----------------------------------------------
+// 			GET FOLLOWERS BY QUERY UID AND UID
+// ----------------------------------------------
+router.get('/followers/:quid/:uid', async (req, res) => {
+  const { quid, uid } = req.params
+  queries.get.followers(quid, uid)
+    .then(results => {
+      const followers = JSON.parse(results[0].followers)
+      followers.forEach(f => {
+        f.follow_date = moment(f.follow_date).format('LL')
+        f.isFollowed === 0 ? f.isFollowed = false : f.isFollowed = true
+      })
+      console.log('Followers Payload', followers);
+      res.json(followers)
+    })
+    .catch(err => console.log(err))
+})
+
+// ----------------------------------------------
+// 			GET FOLLOWING BY QUERY UID AND UID
+// ----------------------------------------------
+router.get('/following/:quid/:uid', async (req, res) => {
+  const { quid, uid } = req.params
+  queries.get.following(quid, uid)
+    .then(results => {
+      const following = JSON.parse(results[0].following)
+      following.forEach(f => {
+        f.follow_date = moment(f.follow_date).format('LL')
+        f.isFollowed === 0 ? f.isFollowed = false : f.isFollowed = true
+      })
+      console.log('Following Payload', following);
+      res.json(following)
     })
     .catch(err => console.log(err))
 })
@@ -125,7 +159,7 @@ router.get('/profile/:uid', async (req, res) => {
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------
-// 			POST USER BY USERNAME, PASSWORD, DATE
+// 			POST USER
 // ----------------------------------------------
 router.post('/user', async (req, res) => {
   const { username } = req.body;
@@ -152,13 +186,14 @@ router.post('/user', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 			POST USER BY FOLLOWING_UID, FOLOWER_UID DATE
+// 			POST USER_FOLLOWER
 // ----------------------------------------------
-router.post('/follower', async (req, res) => {
-  const { following_uid, follower_uid } = req.body
+router.post('/follow', async (req, res) => {
+  const { follower_uid, following_uid } = req.body
   const follow_date = moment().format('YYYY-MM-DD');
-  queries.post.user_follower(following_uid, follower_uid, follow_date)
+  queries.post.user_follower(follower_uid, following_uid, follow_date)
     .then(results => {
+      console.log(`Successfully followed user          uid (${follower_uid})`)
       res.json(results)
     })
     .catch(err => console.log(err.code))
@@ -181,7 +216,7 @@ router.post('/updateName', async (req, res) => {
 })
 
 // ----------------------------------------------
-// 			UPDATE NAME
+// 			UPDATE PROFILE
 // ----------------------------------------------
 
 router.post('/updateProfile', upload.single('icon'), async (req, res) => {
@@ -192,7 +227,7 @@ router.post('/updateProfile', upload.single('icon'), async (req, res) => {
   if (values) {
     queries.update.profile(values.toString(), uid)
       .then(results => {
-        console.log(`Successfully updated Profile Data   uid (${results.insertId})`)
+        console.log(`Successfully updated Profile        uid (${results.insertId})`)
         if (!file) {
           concatResults.push(results)
           res.json(results)
@@ -205,7 +240,7 @@ router.post('/updateProfile', upload.single('icon'), async (req, res) => {
       .then((imageURL) => {
         queries.update.icon(imageURL, uid)
           .then(results => {
-            console.log(`Successfully updated Profile Icon   uid (${results.insertId})`)
+            console.log(`Successfully updated Profile        uid (${results.insertId})`)
             results.data = imageURL
             concatResults.push(results)
           })
@@ -230,6 +265,31 @@ router.post('/byId', async (req, res) => {
       res.json(results)
     })
     .catch(err => console.log(err))
+})
+
+// ----------------------------------------------
+// 			DELETE USER_FOLLOWER
+// ----------------------------------------------
+router.post('/unfollow', async (req, res) => {
+  const { follower_uid, following_uid } = req.body
+  queries.delete.user_follower(follower_uid, following_uid)
+    .then(results => {
+      console.log(`Successfully unfollowed user        uid (${follower_uid})`)
+      res.json(results)
+    })
+    .catch(err => console.log(err.code))
+})
+// ----------------------------------------------
+// 			DELETE OWN USER_FOLLOWER
+// ----------------------------------------------
+router.post('/unfollowOwn', async (req, res) => {
+  const { follower_uid, following_uid } = req.body
+  queries.delete.own_user_follower(follower_uid, following_uid)
+    .then(results => {
+      console.log(`Successfully unfollowed own user    uid (${follower_uid})`)
+      res.json(results)
+    })
+    .catch(err => console.log(err.code))
 })
 
 module.exports = router
