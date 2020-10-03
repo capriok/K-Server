@@ -15,6 +15,17 @@ const statements = {
 			WHERE username = '${username}'
 			AND password LIKE BINARY '${password}'
 		`,
+		users: (uid) => `
+			SELECT u.uid, u.username, u.join_date, p.icon, p.location, (
+				SELECT COUNT(*) 
+				FROM user_followers f
+				WHERE f.follower_uid = ${uid}
+				AND f.following_uid = u.uid
+			) as isFollowed
+			FROM user u 
+			INNER JOIN user_profiles p
+			ON u.uid = p.uid;
+		`,
 		profile: (quid, uid) => `
 			SELECT JSON_OBJECT(
 				'username', u.username,
@@ -201,6 +212,9 @@ module.exports = {
 	get: {
 		user: (username, password) => {
 			return query(statements.get.user(username, password))
+		},
+		users: (uid) => {
+			return query(statements.get.users(uid))
 		},
 		profile: (quid, uid) => {
 			return query(statements.get.profile(quid, uid))

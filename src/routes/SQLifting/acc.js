@@ -76,19 +76,35 @@ router.get('/user', async (req, res) => {
       console.log('Attempting to login...');
       const matchedUsername = results.length > 0
       if (matchedUsername) {
-        console.log(`Successfully found user             uid (${results[0].uid})`);
+        console.log(`Successfully found user             uid (${results[0].uid})`)
         const user = {
           uid: results[0].uid,
           username: results[0].username
         }
         console.table(results)
         const token = jwt.sign(user, process.env.SECRET)
-        console.log(`Successfully signed token           uid (${results[0].uid})`);
+        console.log(`Successfully signed token           uid (${results[0].uid})`)
         res.send({ user, token })
       } else {
         console.log('Login attempt failed');
         res.status(400).end();
       }
+    })
+    .catch(err => console.log(err))
+})
+
+// ----------------------------------------------
+// 			GET ALL USERS
+router.get('/users/:uid', async (req, res) => {
+  const { uid } = req.params
+  queries.get.users(uid)
+    .then(results => {
+      console.log(results)
+      const users = results
+      users.map(u => {
+        u.isFollowed === 0 ? u.isFollowed = false : u.isFollowed = true
+      })
+      res.json(users)
     })
     .catch(err => console.log(err))
 })
@@ -168,7 +184,7 @@ router.post('/user', async (req, res) => {
   const date = moment().format('YYYY-MM-DD');
   queries.post.user(username, password, date)
     .then(results => {
-      console.log(`Successfully created user           uid (${results.insertId})`);
+      console.log(`Successfully created user           uid (${results.insertId})`)
       queries.post.user_profile(results.insertId, '', '', null, '')
         .then(() => console.log(`Successfully created user_profile   uid (${results.insertId})`))
         .catch(err => console.log(err))
