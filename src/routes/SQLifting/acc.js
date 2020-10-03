@@ -62,7 +62,6 @@ const composeUpdateProfileValues = (body) => {
   return values.toString()
 }
 
-
 // ----------------------------------------------------------------------
 // 			 			GET METHODS
 // ----------------------------------------------------------------------
@@ -125,6 +124,7 @@ router.get('/followers/:quid/:uid', async (req, res) => {
   const { quid, uid } = req.params
   queries.get.followers(quid, uid)
     .then(results => {
+      console.log(`Successfully fetched Followers      uid (${quid})`)
       const followers = JSON.parse(results[0].followers)
       followers.forEach(f => {
         f.follow_date = moment(f.follow_date).format('LL')
@@ -143,6 +143,7 @@ router.get('/following/:quid/:uid', async (req, res) => {
   const { quid, uid } = req.params
   queries.get.following(quid, uid)
     .then(results => {
+      console.log(`Successfully fetched Following      uid (${quid})`)
       const following = JSON.parse(results[0].following)
       following.forEach(f => {
         f.follow_date = moment(f.follow_date).format('LL')
@@ -225,7 +226,7 @@ router.post('/updateProfile', upload.single('icon'), async (req, res) => {
   let values = composeUpdateProfileValues(req.body)
   let concatResults = []
   if (values) {
-    queries.update.profile(values.toString(), uid)
+    queries.update.profile(values, uid)
       .then(results => {
         console.log(`Successfully updated Profile        uid (${results.insertId})`)
         if (!file) {
