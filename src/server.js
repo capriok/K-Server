@@ -13,28 +13,38 @@ mysql.connect(() => console.log('MySQL connected successfully'))
 
 app.use(express.json())
 
+
 let netlifyEndpoint = '/.netlify/functions/server'
 
-//Disarray Leaderboard Entry Route
+// -------------------------------------
+// 			DISARRAY | LEADERBOARD ENTRY
+// -------------------------------------
 const leaderboardRouter = require('./routes/DisArray/leaderboard')
 app.use(`${netlifyEndpoint}/leaderboard`, leaderboardRouter)
 
-//API Routes
+// -------------------------------------
+// 			SQLIFTING | DATA API 
+// -------------------------------------
 const SQLiftingRouter = require('./routes/SQLifting/api')
 app.use(`${netlifyEndpoint}/sqlifting/api`, SQLiftingRouter)
 
-// SQLifting Login / Register
+// -------------------------------------
+// 			SQLIFTING | ACCOUNT API
+// -------------------------------------
 const SQLiftingAccRouter = require('./routes/SQLifting/acc.js')
 app.use(`${netlifyEndpoint}/sqlifting/acc`, SQLiftingAccRouter)
 
-//Personal Portfolio Email Dispatch Route
+// -------------------------------------
+// 			PERSONAL PORTFOLIO | CLIENT EMAIL
+// -------------------------------------
 const PortfolioEmailRouter = require('./routes/Portfolio/email.js')
 app.use(`${netlifyEndpoint}/portfolioemail`, PortfolioEmailRouter)
 
-//Keith Phillingane LLC Client Email Dispatch Route
+// -------------------------------------
+// 			KEITH PHILLINGANE LLC | CLIENT EMAIL
+// -------------------------------------
 const KPClientEmailRouter = require('./routes/KP-Construction/email.js');
 app.use(`${netlifyEndpoint}/kpclientemail`, KPClientEmailRouter)
 
-//EXPORTS
 module.exports = app;
 module.exports.handler = serverless(app);
