@@ -17,6 +17,7 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
   }
   next();
 });
+
 // ----------------------------------------------------------------------
 // 			 			MULTER UPLOAD
 // ----------------------------------------------------------------------
@@ -95,16 +96,30 @@ router.get('/user', async (req, res) => {
 
 // ----------------------------------------------
 // 			GET ALL USERS
+// ----------------------------------------------
 router.get('/users/:uid', async (req, res) => {
   const { uid } = req.params
   queries.get.users(uid)
     .then(results => {
-      console.log(results)
+      console.log(`Successfully fetched all users      uid (${uid})`)
       const users = results
       users.map(u => {
         u.isFollowed === 0 ? u.isFollowed = false : u.isFollowed = true
       })
       res.json(users)
+    })
+    .catch(err => console.log(err))
+})
+
+// ----------------------------------------------
+// 			GET USERS BY SEARCH TERM
+// ----------------------------------------------
+router.get('/usersByTerm/:uid/:term', async (req, res) => {
+  const { uid, term } = req.params
+  queries.get.usersByTerm(term, uid)
+    .then(results => {
+      console.log(`Successfully fetched users by term  (${term})`)
+      res.json(results)
     })
     .catch(err => console.log(err))
 })
@@ -246,8 +261,9 @@ router.post('/updateProfile', upload.single('icon'), async (req, res) => {
       .then(results => {
         console.log(`Successfully updated Profile        uid (${results.insertId})`)
         if (!file) {
+          return res.json(results)
+        } else {
           concatResults.push(results)
-          res.json(results)
         }
       })
       .catch(err => console.log(err))

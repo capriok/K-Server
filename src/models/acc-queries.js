@@ -26,6 +26,18 @@ const statements = {
 			INNER JOIN user_profiles p
 			ON u.uid = p.uid;
 		`,
+		usersByTerm: (term, uid) => `
+			SELECT u.uid, u.username, u.join_date, p.icon, p.location, (
+				SELECT COUNT(*) 
+				FROM user_followers f
+				WHERE f.follower_uid = ${uid}
+				AND f.following_uid = u.uid
+			) as isFollowed
+			FROM user u 
+			INNER JOIN user_profiles p
+			ON u.uid = p.uid
+			AND u.username LIKE '${term}%';
+		`,
 		profile: (quid, uid) => `
 			SELECT JSON_OBJECT(
 				'username', u.username,
@@ -215,6 +227,9 @@ module.exports = {
 		},
 		users: (uid) => {
 			return query(statements.get.users(uid))
+		},
+		usersByTerm: (term, uid) => {
+			return query(statements.get.usersByTerm(term, uid))
 		},
 		profile: (quid, uid) => {
 			return query(statements.get.profile(quid, uid))
