@@ -159,8 +159,8 @@ router.get('/wocos/:uid', async (req, res) => {
 	queries.get.wocos(uid)
 		.then(results => {
 			results.forEach(r => {
-				r.circs = JSON.parse(r.circs)
-				r.excos = JSON.parse(r.excos)
+				r.circuits = JSON.parse(r.circuits)
+				r.exercises = JSON.parse(r.exercises)
 				r.table = 'woco'
 				r.group = 'composites'
 			});
