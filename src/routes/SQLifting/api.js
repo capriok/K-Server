@@ -26,10 +26,15 @@ const composeCirc_movsValues = (arr, circ_id) => {
 	})].toString()
 	return values
 }
-const composeWoco_excoORcircValues = (arr, woco_id, type) => {
+const composeWoco_excoValues = (arr, woco_id) => {
 	let values = [arr.map(a => {
-		let excoVals = () => { if (type === 'exco') { return `, ${a.reps}, ${a.weight}` } else { return '' } }
-		return `(${woco_id}, ${a.id}, ${a.sets}${excoVals()})`
+		return `(${woco_id}, ${a.id}, ${a.sets}, ${a.reps}, ${a.weight})`
+	})].toString()
+	return values
+}
+const composeWoco_circValues = (arr, woco_id) => {
+	let values = [arr.map(a => {
+		return `(${woco_id}, ${a.id}, ${a.sets})`
 	})].toString()
 	return values
 }
@@ -159,8 +164,8 @@ router.get('/wocos/:uid', async (req, res) => {
 	queries.get.wocos(uid)
 		.then(results => {
 			results.forEach(r => {
-				r.circuits = JSON.parse(r.circuits)
 				r.exercises = JSON.parse(r.exercises)
+				r.circuit = JSON.parse(r.circuit)
 				r.table = 'woco'
 				r.group = 'composites'
 			});
@@ -231,19 +236,19 @@ router.post('/circ', async (req, res) => {
 
 router.post('/woco', async (req, res) => {
 	const { build, uid } = req.body
-	const { name, exercises, circuits } = build
+	const { name, exercises, circuit } = build
 	queries.post.woco(name, uid)
 		.then(results => {
 			const woco_id = results.insertId
 			console.log(`Successfully inserted Woco (${name})`);
 			// Returns as string (woco_id, exco_id, sets, reps, weight), ...
-			let woco_excoVals = composeWoco_excoORcircValues(exercises, woco_id, 'exco')
+			let woco_excoVals = composeWoco_excoValues(exercises, woco_id)
 			// Insert excos in woco_excos relation table
 			queries.post.woco_excos(woco_excoVals)
 				.then(() => console.log(`Successfully inserted Woco_Excos (${woco_id})`))
 				.catch(err => console.log(err))
 			// Returns as string (woco_id, woco_id, sets), ...
-			let woco_circVals = composeWoco_excoORcircValues(circuits, woco_id, 'circ')
+			let woco_circVals = composeWoco_circValues(circuit, woco_id)
 			// Insert circs in woco_circs relation table
 			if (woco_circVals) {
 				queries.post.woco_circs(woco_circVals)

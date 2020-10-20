@@ -119,7 +119,7 @@ const statements = {
 				INNER JOIN circ
 				ON wc.circ_id = circ.id
 				AND woco.id = wc.woco_id
-			) as circuits
+			) as circuit
 			FROM woco
 			WHERE woco.uid = ${uid};
 		`,
