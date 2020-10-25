@@ -61,7 +61,8 @@ const statements = {
 				INNER JOIN circ
 				ON circ.id = cmov.circ_id 
 			) as deps 
-			FROM circ;
+			FROM circ
+			WHERE circ.uid = ${uid};
 		`,
 		excos: (uid) => `
 			SELECT exco.id, exco.name, JSON_OBJECT(
@@ -77,53 +78,54 @@ const statements = {
 		`,
 		wocos: (uid) => `
 			SELECT woco.id, woco.name, (SELECT JSON_ARRAYAGG(
-			JSON_OBJECT(
-				'id', exco.id,
-				'name', exco.name,
-				'sets', we.sets,
-				'reps', we.reps, 
-				'weight', we.weight,
-				'deps', JSON_OBJECT(
-					'equipment', eq.name,
-					'muscle', mu.name,
-					'exercise', ex.name
-					)
-				)
-			) 
-			FROM woco_excos we
-			INNER JOIN exco
-			ON we.exco_id = exco.id
-			INNER JOIN woco
-			ON woco.id = we.woco_id
-			INNER JOIN muscle mu ON exco.mu_id = mu.id
-			INNER JOIN exercise ex ON exco.ex_id = ex.id
-			INNER JOIN equipment eq ON exco.eq_id = eq.id
-		) as excos, (SELECT IFNULL(JSON_ARRAYAGG(
-			JSON_OBJECT(
-				'id', circ.id,
-				'name', circ.name,
-				'sets', wc.sets,
-				'deps', (SELECT JSON_ARRAYAGG(
-					JSON_OBJECT(
-						'id', mo.id,
-						'name', mo.name,
-						'duration', cmov.duration
+				JSON_OBJECT(
+          'id', exco.id,
+          'name', exco.name,
+          'sets', we.sets,
+          'reps', we.reps, 
+					'weight', we.weight,
+					'deps', JSON_OBJECT(
+						'equipment', eq.name,
+						'muscle', mu.name,
+						'exercise', ex.name
 						)
+          )
+				) 
+        FROM woco_excos we
+        INNER JOIN exco
+        ON we.exco_id = exco.id
+        INNER JOIN woco
+        ON woco.id = we.woco_id
+        INNER JOIN muscle mu ON exco.mu_id = mu.id
+				INNER JOIN exercise ex ON exco.ex_id = ex.id
+				INNER JOIN equipment eq ON exco.eq_id = eq.id
+			) as excos, (SELECT IFNULL(JSON_ARRAYAGG(
+				JSON_OBJECT(
+					'id', circ.id,
+					'name', circ.name,
+					'sets', wc.sets,
+					'deps', (SELECT JSON_ARRAYAGG(
+						JSON_OBJECT(
+							'id', mo.id,
+							'name', mo.name,
+							'duration', cmov.duration
+							)
+						)
+						FROM circ_movs cmov
+						INNER JOIN movement mo
+						ON cmov.mo_id = mo.id
+						INNER JOIN circ 
+						ON circ.id = cmov.circ_id)
 					)
-					FROM circ_movs cmov
-					INNER JOIN movement mo
-					ON cmov.mo_id = mo.id
-					INNER JOIN circ 
-					ON circ.id = cmov.circ_id)
-				)
-			), '[]')
-			FROM woco_circs wc
-			INNER JOIN circ
-			ON wc.circ_id = circ.id
-			INNER JOIN woco
-			ON woco.id = wc.woco_id
-		) as circs
-			FROM woco;
+				), '[]')
+				FROM woco_circs wc
+				INNER JOIN circ
+				ON wc.circ_id = circ.id
+				INNER JOIN woco
+				ON woco.id = wc.woco_id
+			) as circs
+			FROM woco
+			WHERE woco.uid = ${uid};
 		`,
 	},
 	// -------------------------------------
