@@ -251,7 +251,7 @@ router.post('/updateName', async (req, res) => {
 // 			UPDATE PROFILE
 // ----------------------------------------------
 
-router.post('/updateProfile', upload.single('icon'), async (req, res) => {
+router.post('/updateProfile', /*upload.single('icon'),*/ async (req, res) => {
   const file = req.file
   const { uid } = req.body
   let values = composeUpdateProfileValues(req.body)
