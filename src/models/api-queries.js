@@ -48,18 +48,17 @@ const statements = {
 			WHERE uid = ${uid};
 		`,
 		circs: (uid) => `
-			SELECT circ.name, (
+			SELECT circ.id, circ.name, (
 				SELECT JSON_ARRAYAGG(
-					JSON_OBJECT(
-						'name', mo.name,
-						'duration', cmov.duration
+				JSON_OBJECT(
+					'name', mo.name,
+					'duration', cmov.duration
 					)
 				)
 				FROM circ_movs cmov
 				INNER JOIN movement mo
-				ON cmov.mo_id = mo.id
-				INNER JOIN circ
-				ON circ.id = cmov.circ_id 
+				WHERE cmov.mo_id = mo.id
+				AND circ.id = cmov.circ_id 
 			) as deps 
 			FROM circ
 			WHERE circ.uid = ${uid};
@@ -70,7 +69,7 @@ const statements = {
 				'muscle', mu.name,
 				'exercise', ex.name
 			) as deps 
-				FROM exco 
+			FROM exco 
 			INNER JOIN muscle mu ON exco.mu_id = mu.id
 			INNER JOIN exercise ex ON exco.ex_id = ex.id
 			INNER JOIN equipment eq ON exco.eq_id = eq.id
@@ -93,12 +92,11 @@ const statements = {
 				) 
         FROM woco_excos we
         INNER JOIN exco
-        ON we.exco_id = exco.id
-        INNER JOIN woco
-        ON woco.id = we.woco_id
         INNER JOIN muscle mu ON exco.mu_id = mu.id
 				INNER JOIN exercise ex ON exco.ex_id = ex.id
 				INNER JOIN equipment eq ON exco.eq_id = eq.id
+        ON we.exco_id = exco.id
+        WHERE woco.id = we.woco_id
 			) as exercises, (SELECT IFNULL(JSON_ARRAYAGG(
 				JSON_OBJECT(
 					'id', circ.id,
@@ -115,14 +113,14 @@ const statements = {
 						INNER JOIN movement mo
 						ON cmov.mo_id = mo.id
 						INNER JOIN circ 
-						ON circ.id = cmov.circ_id)
+						ON circ.id = cmov.circ_id
+						)
 					)
 				), '[]')
 				FROM woco_circs wc
 				INNER JOIN circ
-				ON wc.circ_id = circ.id
-				INNER JOIN woco
-				ON woco.id = wc.woco_id
+				WHERE wc.circ_id = circ.id
+				AND woco.id = wc.woco_id
 			) as circuit
 			FROM woco
 			WHERE woco.uid = ${uid};

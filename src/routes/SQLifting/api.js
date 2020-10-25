@@ -117,7 +117,7 @@ router.get('/movements/:uid', async (req, res) => {
 			console.log(`Successfully fetched ${results.length} Movements 	uid (${uid})`);
 			res.json(sortByName(results))
 		})
-		.catch(err => console.log(err))
+		.catch(err => { console.log(err); res.end() })
 })
 
 // // ----------------------------------------------
@@ -128,14 +128,14 @@ router.get('/excos/:uid', async (req, res) => {
 	queries.get.excos(uid)
 		.then(results => {
 			results.forEach(r => {
-				r.deps = JSON.parse(r.deps)
+				r.deps = r.deps
 				r.table = 'exco'
 				r.group = 'composites'
 			});
 			console.log(`Successfully fetched ${results.length} Excos 	uid (${uid})`);
 			res.json(sortByName(results))
 		})
-		.catch(err => console.log(err))
+		.catch(err => { console.log(err); res.end() })
 })
 
 // ----------------------------------------------
@@ -153,7 +153,7 @@ router.get('/circs/:uid', async (req, res) => {
 			console.log(`Successfully fetched ${results.length} Circs 	uid (${uid})`);
 			res.json(sortByName(results))
 		})
-		.catch(err => console.log(err))
+		.catch(err => { console.log(err); res.end() })
 })
 
 // // ----------------------------------------------
@@ -172,7 +172,7 @@ router.get('/wocos/:uid', async (req, res) => {
 			console.log(`Successfully fetched ${results.length} Wocos 	uid (${uid})`);
 			res.json(sortByName(results))
 		})
-		.catch(err => console.log(err))
+		.catch(err => { console.log(err); res.end() })
 })
 
 // ----------------------------------------------------------------------
