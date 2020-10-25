@@ -21,29 +21,29 @@ router.use(cors(corsOptions(whitelist)), (req, res, next) => {
 // ----------------------------------------------------------------------
 // 			 			MULTER UPLOAD
 // ----------------------------------------------------------------------
-const multer = require('multer')
-const storage = multer.diskStorage({
-  destination: './local/user/icon',
-  filename: (req, file, cb) => {
-    cb(null, `uid-${req.body.uid}${path.extname(file.originalname)}`)
-  }
-})
-const upload = multer({ storage })
+// const multer = require('multer')
+// const storage = multer.diskStorage({
+//   destination: './local/user/icon',
+//   filename: (req, file, cb) => {
+//     cb(null, `uid-${req.body.uid}${path.extname(file.originalname)}`)
+//   }
+// })
+// const upload = multer({ storage })
 
 // ----------------------------------------------------------------------
 // 			 			GAYZO UPLOAD
 // ----------------------------------------------------------------------
-const Gyazo = require('gyazo-api');
-const G = new Gyazo('b7850ec374055ef3470b51c1b0842adf41ce21b09debf9cfcc4cb253d0326b9f')
-const GayzoUpload = (file) => {
-  return new Promise((resolve, reject) => {
-    G.upload(file.path)
-      .then(res => {
-        resolve(`https://i.gyazo.com/${res.data.image_id}${path.extname(file.originalname)}`)
-      })
-      .catch(err => reject(err))
-  })
-}
+// const Gyazo = require('gyazo-api');
+// const G = new Gyazo('b7850ec374055ef3470b51c1b0842adf41ce21b09debf9cfcc4cb253d0326b9f')
+// const GayzoUpload = (file) => {
+//   return new Promise((resolve, reject) => {
+//     G.upload(file.path)
+//       .then(res => {
+//         resolve(`https://i.gyazo.com/${res.data.image_id}${path.extname(file.originalname)}`)
+//       })
+//       .catch(err => reject(err))
+//   })
+// }
 
 // ----------------------------------------------------------------------
 // 			 			COMPOSE VALUES INTO SQL MULTIPLE UPDATE SYNTAX
@@ -269,18 +269,19 @@ router.post('/updateProfile', upload.single('icon'), async (req, res) => {
       .catch(err => console.log(err))
   }
   if (file) {
-    GayzoUpload(file)
-      .then((imageURL) => {
-        queries.update.icon(imageURL, uid)
-          .then(results => {
-            console.log(`Successfully updated Profile        uid (${results.insertId})`)
-            results.data = imageURL
-            concatResults.push(results)
-          })
-          .catch(err => console.log(err))
-      })
-      .then(() => res.json(concatResults))
-      .catch(err => console.log(err))
+    return
+    // GayzoUpload(file)
+    //   .then((imageURL) => {
+    //     queries.update.icon(imageURL, uid)
+    //       .then(results => {
+    //         console.log(`Successfully updated Profile        uid (${results.insertId})`)
+    //         results.data = imageURL
+    //         concatResults.push(results)
+    //       })
+    //       .catch(err => console.log(err))
+    //   })
+    //   .then(() => res.json(concatResults))
+    //   .catch(err => console.log(err))
   }
 })
 
