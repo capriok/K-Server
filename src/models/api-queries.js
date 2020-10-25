@@ -58,7 +58,7 @@ const statements = {
 				FROM circ_movs cmov
 				INNER JOIN movement mo
 				WHERE cmov.mo_id = mo.id
-				AND cmov.circ_id = circ.id
+				AND circ.id = cmov.circ_id
 			) as deps 
 			FROM circ
 			WHERE circ.uid = ${uid};
@@ -95,8 +95,8 @@ const statements = {
         INNER JOIN muscle mu ON exco.mu_id = mu.id
 				INNER JOIN exercise ex ON exco.ex_id = ex.id
 				INNER JOIN equipment eq ON exco.eq_id = eq.id
-        ON we.exco_id = exco.id
-        WHERE woco.id = we.woco_id
+        WHERE we.exco_id = exco.id
+        AND woco.id = we.woco_id
 			) as exercises, (SELECT IFNULL(JSON_ARRAYAGG(
 				JSON_OBJECT(
 					'id', circ.id,
@@ -111,9 +111,8 @@ const statements = {
 						)
 						FROM circ_movs cmov
 						INNER JOIN movement mo
-						ON cmov.mo_id = mo.id
-						INNER JOIN circ 
-						ON circ.id = cmov.circ_id
+						WHERE  cmov.mo_id = mo.id
+						AND circ.id = cmov.circ_id
 						)
 					)
 				), '[]')
