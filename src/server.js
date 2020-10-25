@@ -8,7 +8,7 @@ const app = express()
 const port = process.env.PORT || 9000
 
 app.listen(port, () => console.log(`Server running on port ${port}`))
-mongo.once('open', () => console.log('MongoDB connected successfully'))
+// mongo.once('open', () => console.log('MongoDB connected successfully'))
 mysql.connect(() => console.log('MySQL connected successfully'))
 
 app.use(express.json())

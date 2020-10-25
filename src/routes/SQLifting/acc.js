@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const path = require('path')
 const jwt = require('jsonwebtoken')
 const moment = require('moment')
 const queries = require('../../models/acc-queries')
