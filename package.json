@@ -22,16 +22,16 @@
     "express": "^4.17.1",
     "gyazo-api": "^0.3.1",
     "jsonwebtoken": "^8.5.1",
-    "moment": "^2.29.1",
-    "mongodb": "^3.6.2",
-    "mongoose": "^5.10.10",
+    "moment": "^2.27.0",
+    "mongodb": "^3.5.5",
+    "mongoose": "^5.9.6",
     "multer": "^1.4.2",
     "mysql": "^2.18.1",
     "netlify-lambda": "^1.6.3",
-    "nodemailer": "^6.4.14",
-    "pg": "^8.4.1",
+    "nodemailer": "^6.4.6",
+    "pg": "^8.0.3",
     "serve": "^11.3.0",
-    "serverless-http": "^2.6.0"
+    "serverless-http": "^2.3.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
