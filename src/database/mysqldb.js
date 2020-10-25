@@ -1,23 +1,16 @@
 const mysql = require('mysql');
+require('dotenv').config()
 const HOST = process.env.MYSQLHOST
 const PASS = process.env.MYSQLPASS
 
-//RDS
-// const connection = mysql.createConnection({
-//   user: 'admin',
-//   password: PASS,
-//   database: 'sqlifting',
-//   host: HOST,
-//   port: 3306,
-//   multipleStatements: true
-// });
+const isDev = process.env.NODE_ENV === 'development'
 
-//LOCAL
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
+  user: isDev ? 'root' : 'admin',
   password: PASS,
+  host: isDev ? 'localhost' : HOST,
   database: 'sqlifting',
+  port: 3306,
   multipleStatements: true
 });
 

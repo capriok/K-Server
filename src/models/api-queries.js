@@ -99,7 +99,7 @@ const statements = {
         INNER JOIN muscle mu ON exco.mu_id = mu.id
 				INNER JOIN exercise ex ON exco.ex_id = ex.id
 				INNER JOIN equipment eq ON exco.eq_id = eq.id
-			) as excos, (SELECT IFNULL(JSON_ARRAYAGG(
+			) as exercises, (SELECT IFNULL(JSON_ARRAYAGG(
 				JSON_OBJECT(
 					'id', circ.id,
 					'name', circ.name,
@@ -123,7 +123,7 @@ const statements = {
 				ON wc.circ_id = circ.id
 				INNER JOIN woco
 				ON woco.id = wc.woco_id
-			) as circs
+			) as circuit
 			FROM woco
 			WHERE woco.uid = ${uid};
 		`,

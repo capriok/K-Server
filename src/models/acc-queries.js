@@ -209,6 +209,7 @@ const statements = {
 
 const query = async (statement) => {
 	return new Promise((resolve, reject) => {
+		console.log(statement);
 		DB.query(statement, (err, results) => {
 			if (err) return reject(err)
 			resolve(results)
