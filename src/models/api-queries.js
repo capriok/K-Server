@@ -58,7 +58,7 @@ const statements = {
 				FROM circ_movs cmov
 				INNER JOIN movement mo
 				WHERE cmov.mo_id = mo.id
-				AND circ.id = cmov.circ_id 
+				AND cmov.circ_id = circ.id
 			) as deps 
 			FROM circ
 			WHERE circ.uid = ${uid};
