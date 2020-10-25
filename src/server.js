@@ -31,19 +31,19 @@ app.use(`${netlifyEndpoint}/sqlifting/api`, SQLiftingRouter)
 // -------------------------------------
 // 			SQLIFTING | ACCOUNT API
 // -------------------------------------
-const SQLiftingAccRouter = require('./routes/SQLifting/acc.js')
+const SQLiftingAccRouter = require('./routes/SQLifting/acc')
 app.use(`${netlifyEndpoint}/sqlifting/acc`, SQLiftingAccRouter)
 
 // -------------------------------------
 // 			PERSONAL PORTFOLIO | CLIENT EMAIL
 // -------------------------------------
-const PortfolioEmailRouter = require('./routes/Portfolio/email.js')
+const PortfolioEmailRouter = require('./routes/Portfolio/email')
 app.use(`${netlifyEndpoint}/portfolioemail`, PortfolioEmailRouter)
 
 // -------------------------------------
 // 			KEITH PHILLINGANE LLC | CLIENT EMAIL
 // -------------------------------------
-const KPClientEmailRouter = require('./routes/KP-Construction/email.js');
+const KPClientEmailRouter = require('./routes/KP-Construction/email');
 app.use(`${netlifyEndpoint}/kpclientemail`, KPClientEmailRouter)
 
 module.exports = app;
