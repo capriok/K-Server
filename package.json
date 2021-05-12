@@ -28,7 +28,7 @@
     "multer": "^1.4.2",
     "mysql": "^2.18.1",
     "netlify-lambda": "^1.6.3",
-    "nodemailer": "^6.4.6",
+    "nodemailer": "^6.4.16",
     "pg": "^8.0.3",
     "serve": "^11.3.0",
     "serverless-http": "^2.3.2"
